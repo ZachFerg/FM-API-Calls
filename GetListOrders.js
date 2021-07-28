@@ -14,8 +14,8 @@ async function getListOrders() {
   try {
     let res = await axios(config);
     if (res.status == 200) {
-      // test for status you want, etc
       console.log(res.status);
+      console.log("Order Call successful...");
     }
     // Don't forget to return something
     return res.data;
@@ -23,3 +23,17 @@ async function getListOrders() {
     console.error(err);
   }
 }
+
+getListOrders().then((data) => {
+  console.log("Need to grab all the order ID's");
+  const orderIDList = [];
+  try {
+    data.orders.forEach(function (order) {
+      orderIDList.push(order.id);
+    });
+    // console.log(orderIDList);
+    return orderIDList;
+  } catch (err) {
+    console.error(err);
+  }
+});
