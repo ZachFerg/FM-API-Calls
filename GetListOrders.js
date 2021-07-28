@@ -1,5 +1,5 @@
 require("dotenv").config();
-var axios = require("axios");
+const axios = require("axios");
 
 function formatDate(date) {
   var d = new Date(date),
@@ -32,7 +32,7 @@ Object.keys(params).forEach((key) =>
   param_url.searchParams.append(key, params[key])
 );
 
-var config = {
+const config = {
   method: "get",
   url: param_url.href,
   headers: {

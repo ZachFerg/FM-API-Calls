@@ -1,13 +1,23 @@
 require("dotenv").config();
-var axios = require("axios");
+const axios = require("axios");
 
-var config = {
-  method: "get",
-  url: "https://api.fotomerchanthv.com/orders/01EV8E4XAFVE6116BHTE3QEG9A/lab",
-  headers: {
-    Authorization: process.env.FM_API_KEY,
-  },
-};
+sample_data = ["01FBG2PXN313G74YSN1KRPMPVY", "01FBG326J0BX8JJSAS3BSBBWJG"];
+
+makedate = "01FBG2PXN313G74YSN1KRPMPVY"
+
+const param_url = new URL(
+    `https://api.fotomerchanthv.com/orders/${makedate}/lab`
+  );
+
+  console.log(param_url)
+  
+  const config = {
+    method: "get",
+    url: param_url.href,
+    headers: {
+      Authorization: process.env.FM_API_KEY,
+    },
+  };
 
 async function getOrderLab() {
   console.log("Starting Get Order Lab call.....");
@@ -26,9 +36,9 @@ async function getOrderLab() {
 
 getOrderLab().then((data) => {
   console.log("Axios already returns a JSON object so no need to parse");
-  console.log(data);
+//   console.log(data);
   try {
-    console.log("making object for MySQL insertion");
+    console.log("making object for MySQL statement");
     const finalPayload = {
       _fknShootNumber: data.order.clientSession.externalReference,
       _fktCustomerNo: data.order.clientSession.client.externalReference,
