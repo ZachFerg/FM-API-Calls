@@ -20,10 +20,10 @@ const day_before = new Date(today);
 yesterday.setDate(yesterday.getDate() - 1);
 day_before.setDate(day_before.getDate() - 2);
 
-const fm_today = formatDate(today);
 const fm_yesterday = formatDate(yesterday);
 const fm_day_before = formatDate(day_before);
 
+// takes url and appends parameters
 const param_url = new URL(
   "https://api.fotomerchanthv.com/orders?page=1&limit=100&type=all&orderDir=ASC&from=&to="
 );
