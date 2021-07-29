@@ -1,5 +1,5 @@
 // Dependencies
-const connection = require("../config/mysql_strawbridge");
+const connection = require("../config/mysql_connection");
 
 // Object for model
 const model = (model) => {
@@ -11,9 +11,9 @@ model.createOne = (table, jsonSent, result) => {
   let values = [];
   let sql = "INSERT INTO ?? ( ?? ) VALUES( ? )";
   console.log(sql);
-  // console.log('json length is ', jsonSent.length)
+  console.log('json length is ', jsonSent.length)
   for (let x = 0; x < jsonSent.length; x++) {
-    // console.log("starting loops")
+    console.log("starting loops")
     let bit = jsonSent[x];
     for (let i in bit) {
       keys.push(i);

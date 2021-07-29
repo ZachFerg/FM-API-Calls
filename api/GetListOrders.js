@@ -1,4 +1,4 @@
-require("dotenv").config();
+require('dotenv').config({path: '../.ENV'})
 const axios = require("axios");
 
 function formatDate(date) {
@@ -25,7 +25,7 @@ const fm_day_before = formatDate(day_before);
 
 // takes url and appends parameters
 const param_url = new URL(
-  "https://api.fotomerchanthv.com/orders?page=1&limit=100&type=all&orderDir=ASC&from=&to="
+  "https://api.fotomerchanthv.com/orders?page=1&limit=200&type=all&orderDir=ASC&"
 );
 const params = { from: fm_day_before, to: fm_yesterday };
 Object.keys(params).forEach((key) =>
@@ -52,6 +52,8 @@ async function getListOrders() {
     } else if (res.status == 504) {
       console.log("Order Call timed out, retrying...")
       getListOrders()
+    } else {
+      console.log("something weird is happening")
     }
     // Don't forget to return something
     return res.data;

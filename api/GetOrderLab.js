@@ -1,4 +1,4 @@
-require("dotenv").config();
+require('dotenv').config({path: '../.ENV'})
 const axios = require("axios");
 
 sample_data = ["01FBG2PXN313G74YSN1KRPMPVY", "01FBG326J0BX8JJSAS3BSBBWJG"];
@@ -16,6 +16,8 @@ const config = {
     Authorization: process.env.FM_API_KEY,
   },
 };
+
+console.log(config.url)
 
 async function getOrderLab() {
   console.log("Starting Get Order Lab call.....");
