@@ -93,6 +93,7 @@ getOrderLab().then((data) => {
       );
       undefinedOrders.push(data.order.id);
       //   console.log(undefinedOrders);
+      return undefinedOrders;
     } else {
       console.log("it's not a TypeError");
     }

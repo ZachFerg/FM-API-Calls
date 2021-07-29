@@ -52,7 +52,7 @@ const json = {
 
 request.post(
   {
-    url: "http://localhost:3000/employees",
+    url: "http://localhost:3000/loroco_test",
     body: json,
     json: true,
   },

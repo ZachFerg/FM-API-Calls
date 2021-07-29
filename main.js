@@ -26,6 +26,15 @@ app.get("/employees", (request, response) => {
   });
 });
 
+// Add a new order
+app.post('/loroco_test', (request, response) => {
+  connection.query('INSERT INTO loroco_test VALUES ?', request.body, (error, result) => {
+      if (error) throw error;
+
+      response.status(201).send(`Order added with ID: ${result}`);
+  });
+});
+
 // Display a single user by ID
 app.get("/employees/:employeeNumber", (request, response) => {
   const employeeNumber = request.params.employeeNumber;
