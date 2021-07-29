@@ -87,15 +87,14 @@ getOrderLab().then((data) => {
     // console.log(err);
     if ((err.name = "TypeError")) {
       const undefinedOrders = [];
-      console.log("Looks like that order didn't have all the objects needed")
-      console.log("order " + data.order.id + " is being added to a list to show later");
+      console.log("Looks like that order didn't have all the objects needed");
+      console.log(
+        "order " + data.order.id + " is being added to a list to show later"
+      );
       undefinedOrders.push(data.order.id);
-    //   console.log(undefinedOrders);
+      //   console.log(undefinedOrders);
     } else {
       console.log("it's not a TypeError");
     }
   }
 });
-
-
-console.log("this should come up at the end")

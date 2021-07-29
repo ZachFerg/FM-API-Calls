@@ -6,12 +6,11 @@ const model = (model) => {
   this.model = model;
 };
 
-// https://stackoverflow.com/questions/1078118/how-do-i-iterate-over-a-json-structure
 model.createOne = (table, jsonSent, result) => {
   let keys = [];
   let values = [];
   let sql = "INSERT INTO ?? ( ?? ) VALUES( ? )";
-  console.log(sql)
+  console.log(sql);
   // console.log('json length is ', jsonSent.length)
   for (let x = 0; x < jsonSent.length; x++) {
     // console.log("starting loops")
@@ -31,4 +30,3 @@ model.createOne = (table, jsonSent, result) => {
 
 // Export model object
 module.exports = model;
-

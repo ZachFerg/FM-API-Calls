@@ -1,32 +1,43 @@
-let data = {
-  order: {
-    id: "01FBG2PXN313G74YSN1KRPMPVY",
-    recipientName: "Jennifer Hale",
-    recipientEmail: "email1@gmail.com",
-    subject: {
-      firstName: "Lillie",
-      lastName: "Hale",
-      email: "email@gmail.com",
-      grade: 6,
-    },
-  },
-};
+const express = require("express");
+const app = express();
 
-if (data && data["order"] && data["order"]["subject"]) {
-  console.log("we have all the objects");
-} else {
-  console.log("we are missing something");
-  if (data["order"]["subject"]) {
-    console.log("we have the order.subject Object");
-  } else {
-    console.log("we do not have the order.subject Object");
-    subject = {
-      subject: {
-        grade: null,
-        firstName: null,
-      },
-    };
-    let merged = { ...data, ...subject };
-    console.log(merged);
-  }
-}
+const connection = require("./config/mysql_connection"); // Load the MySQL pool connection
+
+const hostname = "127.0.0.1";
+const port = 3000;
+
+app.listen(port, () => {
+  console.log(
+    `Fotomerchant Application listening at http://${hostname}:${port}`
+  );
+});
+
+// main page
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+// Display all users
+app.get("/employees", (request, response) => {
+  connection.query("SELECT * FROM employees", (error, result) => {
+    if (error) throw error;
+
+    response.send(result);
+  });
+});
+
+// Display a single user by ID
+app.get("/employees/:employeeNumber", (request, response) => {
+  const employeeNumber = request.params.employeeNumber;
+  console.log(employeeNumber);
+
+  connection.query(
+    "SELECT * FROM employees WHERE employeeNumber = ?",
+    employeeNumber,
+    (error, result) => {
+      if (error) throw error;
+
+      response.send(result);
+    }
+  );
+});

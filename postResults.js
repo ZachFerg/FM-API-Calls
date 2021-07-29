@@ -1,7 +1,11 @@
-// Dependencies
-const controller = require("../models/mysql_strawbridge");
+const request = require("request");
 
-req = {
+// const json = {
+//   name: "Dinesh Chugtai",
+//   email: "dinesh@piedpiper.com",
+// };
+
+const json = {
   _fknShootNumber: "341122",
   _fktCustomerNo: "113818",
   _fktPackage: null,
@@ -46,20 +50,13 @@ req = {
   TM: "GC",
 };
 
-createOne = (req, res) => {
-  const table = req.params.table;
-  const jsonSent = req.body;
-
-  console.log("Table is ", table);
-  console.log("the req.body is: ", jsonSent);
-
-  controller.createOne(table, jsonSent, (err, controller) => {
-    if (err) res.status(500).send(err);
-    console.log("the error is: ", err);
-  });
-};
-
-// Export controllers
-module.exports = {
-  createOne,
-};
+request.post(
+  {
+    url: "http://localhost:3000/employees",
+    body: json,
+    json: true,
+  },
+  function (error, response, body) {
+    console.log(body);
+  }
+);
