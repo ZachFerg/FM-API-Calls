@@ -1,16 +1,13 @@
 require("dotenv").config();
 const axios = require("axios");
-const { type } = require("os");
 
 sample_data = ["01FBG2PXN313G74YSN1KRPMPVY", "01FBG326J0BX8JJSAS3BSBBWJG"];
 
-order_id = "01FBG326J0BX8JJSAS3BSBBWJG";
+order_id = "01FBG2PXN313G74YSN1KRPMPVY";
 
 const param_url = new URL(
   `https://api.fotomerchanthv.com/orders/${order_id}/lab`
 );
-
-console.log(param_url.href);
 
 const config = {
   method: "get",
@@ -26,7 +23,7 @@ async function getOrderLab() {
     let res = await axios(config);
     if (res.status == 200) {
       // test for status you want, etc
-      console.log(res.status);
+      console.log("Order Call successful...");
     }
     // Don't forget to return something
     return res.data;
@@ -36,7 +33,6 @@ async function getOrderLab() {
 }
 
 getOrderLab().then((data) => {
-  //   console.log(data);
   console.log("making object for MySQL statement");
   try {
     const finalPayload = {
@@ -88,14 +84,18 @@ getOrderLab().then((data) => {
     console.log(finalPayload);
     return finalPayload;
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     if ((err.name = "TypeError")) {
       const undefinedOrders = [];
-      console.log(data.order.id + " is the order that doesn't have all data");
+      console.log("Looks like that order didn't have all the objects needed")
+      console.log("order " + data.order.id + " is being added to a list to show later");
       undefinedOrders.push(data.order.id);
-      console.log(undefinedOrders);
+    //   console.log(undefinedOrders);
     } else {
       console.log("it's not a TypeError");
     }
   }
 });
+
+
+console.log("this should come up at the end")

@@ -30,10 +30,10 @@ function handleDisconnect() {
   connection.connect(function (err) {
     if (err) {
       DEBUG.log("error when connecting to db:", err);
-      DEBUG.log("before the time out");
       setTimeout(handleDisconnect, 2000);
     }
   });
+
   connection.on("error", function (err) {
     DEBUG.log("db error", err);
     if (err.code === "PROTOCOL_CONNECTION_LOST") {
@@ -49,3 +49,6 @@ handleDisconnect();
 console.log("connecting to " + nodeEnv);
 console.log("host is: " + db_config.host);
 console.log("connecting to " + db_config.database);
+
+// Export MySQL connection
+module.exports = connection;

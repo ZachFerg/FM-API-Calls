@@ -32,6 +32,8 @@ Object.keys(params).forEach((key) =>
   param_url.searchParams.append(key, params[key])
 );
 
+console.log(param_url.href)
+
 const config = {
   method: "get",
   url: param_url.href,
@@ -47,6 +49,9 @@ async function getListOrders() {
     if (res.status == 200) {
       // console.log(res.status);
       console.log("Order Call successful...");
+    } else if (res.status == 504) {
+      console.log("Order Call timed out, retrying...")
+      getListOrders()
     }
     // Don't forget to return something
     return res.data;
@@ -66,7 +71,7 @@ getListOrders().then((data) => {
     data.orders.forEach(function (order) {
       orderIDList.push(order.id);
     });
-    console.log(orderIDList);
+    // console.log(orderIDList);
     return orderIDList;
   } catch (err) {
     console.error(err);

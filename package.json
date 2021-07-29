@@ -1,0 +1,25 @@
+{
+  "name": "fm-api-calls",
+  "version": "1.0.0",
+  "description": "project for API calls from Fotomerchant",
+  "main": "main.js",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "axios": "^0.21.1",
+    "mysql": "^2.18.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZachFerg/FM-API-Calls.git"
+  },
+  "author": "Zach Ferguson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ZachFerg/FM-API-Calls/issues"
+  },
+  "homepage": "https://github.com/ZachFerg/FM-API-Calls#readme"
+}
