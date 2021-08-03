@@ -1,67 +1,25 @@
-const request = require('request');
+const request = require("request");
 
 function formatDate(date) {
-    var d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
+  var d = new Date(date),
+    month = "" + (d.getMonth() + 1),
+    day = "" + d.getDate(),
+    year = d.getFullYear();
 
-    if (month.length < 2) 
-        month = '0' + month;
-    if (day.length < 2) 
-        day = '0' + day;
+  if (month.length < 2) month = "0" + month;
+  if (day.length < 2) day = "0" + day;
 
-    return [year, month, day].join('-');
+  return [year, month, day].join("-");
 }
 
 // example json to test insertion to DB
-const json = [{
-  _fknShootNumber: "341122",
-  _fktCustomerNo: "113818",
-  _fktPackage: null,
-  clientName: "G C Burkhead Elementary School",
-  customerName: "Jennifer Hale",
-  dateIn: formatDate("2021-07-26T00:16:22+00:00"),
-  emailAddress: "jlhale87@gmail.com",
-  fmhvPackageCost: "30",
-  fmhvPaymentMethod: "stripe",
-  fmhvSeason: "Spring Proof 2020-2021",
-  fmhvSession: "Spring Pictures 3-22-2021",
-  fmhvShipCode: null,
-  fmhvShipCost: "7",
-  fmhvStage: "5. Late Order: 8x10 Campaign",
-  fmhvTotal: "37",
-  grade: "1",
-  graduationYear: null,
-  homeAddress: "93 Pony Chase Lane",
-  homeAddress2: null,
-  homeCity: "Elizabethtown",
-  homePhone1: "5025445626",
-  homeState: "KY",
-  homeZip: "42701",
-  LoRoCo: null,
-  namesOnPrints: null,
-  OnlineCode: "FM3411221609",
-  paidHow: null,
-  parentFirstName: "Jennifer",
-  parentLastName: "Jennifer",
-  referenceNumber: "021-726-MTWR2",
-  relationshipToStudent: null,
-  seasonExternalReference: "Spring Proof 2020-2021",
-  shippingDiscount: "0",
-  shippingMethod: null,
-  studentFirstName: "Naomi",
-  studentID: "2120862420",
-  studentLastName: "Morgan",
-  teacher: "Nelson",
-  TM: "GC",
-},
-{
-    _fknShootNumber: "285948",
-    _fktCustomerNo: "146897",
+const json = [
+  {
+    _fknShootNumber: "341122",
+    _fktCustomerNo: "113818",
     _fktPackage: null,
     clientName: "G C Burkhead Elementary School",
-    customerName: "commander shephard",
+    customerName: "Jennifer Hale",
     dateIn: formatDate("2021-07-26T00:16:22+00:00"),
     emailAddress: "jlhale87@gmail.com",
     fmhvPackageCost: "30",
@@ -96,12 +54,104 @@ const json = [{
     studentLastName: "Morgan",
     teacher: "Nelson",
     TM: "GC",
-  }];
+  },
+  {
+    _fknShootNumber: "354285",
+    _fktCustomerNo: "108613",
+    _fktPackage: null,
+    Catalog_UID: null,
+    Client_Name: "Winston Park Elementary School",
+    Customer_Name: "Renata",
+    dateIn: formatDate("2021-03-14T23:16:26+00:00"),
+    emailAddress: "renatalock@hotmail.com",
+    fmhvCatalog: null,
+    fmhvCategory: "Fall",
+    fmhvPackageCost: "10",
+    fmhvPaymentMethod: "stripe",
+    fmhvSeason: "Fall Prepay 2020-2021",
+    fmhvSession: "Fall Pictures 02-16-2021",
+    fmhvShipCode: null,
+    fmhvShipCost: "7",
+    fmhvStage: "3. Late Order: Images Posted",
+    fmhvTotal: "17",
+    grade: "5",
+    graduationYear: null,
+    homeAddress: "5520 Lyons Rd",
+    homeAddress2: null,
+    homeCity: "Coconut Creek",
+    homePhone1: "5618779362",
+    homeState: "FL",
+    homeZip: "33073",
+    LoRoCo: null,
+    namesOnPrints: null,
+    OnlineCode: "FM3542851069",
+    paidHow: null,
+    parentFirstName: "Renata",
+    parentLastName: "Renata",
+    referenceNumber: "021-314-DRUVM",
+    relationshipToStudent: null,
+    Season_External_Reference: "Fall Prepay 2020-2021",
+    Shipping_Discount: "0",
+    Shipping_Method: null,
+    studentFirstName: "Lucas",
+    studentID: "618089622",
+    studentLastName: "Dos Santos",
+    teacher: "Niforos",
+    TM: "ROS",
+  },
+  {
+    _fknShootNumber: "357317",
+    _fktCustomerNo: "100598",
+    _fktPackage: null,
+    Catalog_UID: null,
+    Client_Name: "Ressie Jeffries Elementary School",
+    Customer_Name: "amy",
+    dateIn: "2021-07-28T13:38:29+00:00",
+    emailAddress: "amytwele@gmail.com",
+    fmhvCatalog: null,
+    fmhvCategory: "Spring",
+    fmhvPackageCost: "28",
+    fmhvPaymentMethod: "stripe",
+    fmhvSeason: "Spring Spec 2020-2021",
+    fmhvSession: "Spring Pictures 3-19-2021",
+    fmhvShipCode: null,
+    fmhvShipCost: "7",
+    fmhvStage: "1. SPEC Stage",
+    fmhvTotal: "35",
+    grade: "Pk",
+    graduationYear: null,
+    homeAddress: "324 Blue Ridge Ave",
+    homeAddress2: null,
+    homeCity: "Front Royal",
+    homePhone1: "5406834500",
+    homeState: "VA",
+    homeZip: "22630",
+    LoRoCo: null,
+    namesOnPrints: null,
+    OnlineCode: "FM3573171027",
+    paidHow: null,
+    parentFirstName: "Amy",
+    parentLastName: "Amy",
+    referenceNumber: "021-728-DXFK6",
+    relationshipToStudent: null,
+    Season_External_Reference: "Spring Spec 2020-2021",
+    Shipping_Discount: "0",
+    Shipping_Method: null,
+    studentFirstName: "Kenley",
+    studentID: undefined,
+    studentLastName: "Twele",
+    teacher: "Smith",
+    TM: "AES",
+  },
+];
 
-request.post({
-    url: 'http://localhost:3000/loroco_test',
+request.post(
+  {
+    url: "http://localhost:3000/loroco_test",
     body: json,
     json: true,
-}, function (error, response, body) {
+  },
+  function (error, response, body) {
     // console.log(body);
-});
+  }
+);
