@@ -1,12 +1,21 @@
 const express = require("express");
-require('dotenv').config();
+require("dotenv").config();
+const connection = require("./config/mysql_connection");
+// const controller = require("./controllers/mysql_strawbridge");
+// const apiRoutes = require('./routes/mysql_strawbridge');
+
 const app = express();
-
-const connection = require("./config/mysql_connection"); // Load the MySQL pool connection
-const controller = require("./controllers/mysql_strawbridge"); // Load the MySQL pool connection
-
 const hostname = "127.0.0.1";
 const port = 3000;
+
+app.use(express.json());
+
+// app.use('/', apiRoutes)
+
+// main page
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 
 app.listen(port, () => {
   console.log(
@@ -14,57 +23,38 @@ app.listen(port, () => {
   );
 });
 
-// main page
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+// Add a new order
+app.post("/loroco_test", (request, response) => {
+  // console.log(request.body);
+  let keys = [];
+  let values = [];
+  let sql = "INSERT INTO loroco_test ( ?? ) VALUES( ? )";
+  for (let x = 0; x < request.body.length; x++) {
+    console.log("starting loops");
+    let bit = request.body[x];
+    for (let i in bit) {
+      keys.push(i);
+      values.push(bit[i]);
+    }
+    // console.log("keys: ", keys);
+    // console.log("values: ", values);
+    connection.query(sql, [keys, values], (error, result) => {
+      if (error) throw error;
+      // response.status(201).send(`Order added`);
+      console.log("order added")
+    });
+    keys = [];
+    values = [];
+  }
+  // console.log("this should show up last");
 });
 
 // Display all users
-app.get("/employees", (request, response) => {
-  connection.query("SELECT * FROM employees", (error, result) => {
+app.get("/loroco_test", (request, response) => {
+  console.log("getting all lorocos");
+  connection.query("SELECT * FROM loroco_test", (error, result) => {
     if (error) throw error;
 
     response.send(result);
   });
-});
-
-// Add a new order
-// app.post('/loroco_test', (request, response) => {
-//   connection.query('INSERT INTO loroco_test VALUES ?', request.body, (error, result) => {
-//       if (error) throw error;
-
-//       response.status(201).send(`Order added with ID: ${result}`);
-//   });
-// });
-
-// adds a new order
-app.post('/loroco_test', (req, res) => {
-  const table = req.params.table;
-  const jsonSent = req.body;
-
-  console.log("Table is ", table);
-  console.log("the req.body is: ", jsonSent);
-
-  controller.createOne(table, jsonSent, (err, controller) => {
-    if (err) res.status(500).send(err);
-    console.log("the error is: ", err);
-  });
-});
-
-
-
-// Display a single user by ID
-app.get("/employees/:employeeNumber", (request, response) => {
-  const employeeNumber = request.params.employeeNumber;
-  console.log(employeeNumber);
-
-  connection.query(
-    "SELECT * FROM employees WHERE employeeNumber = ?",
-    employeeNumber,
-    (error, result) => {
-      if (error) throw error;
-
-      response.send(result);
-    }
-  );
 });
