@@ -106,7 +106,7 @@ const json = [
     Catalog_UID: null,
     Client_Name: "Ressie Jeffries Elementary School",
     Customer_Name: "amy",
-    dateIn: "2021-07-28T13:38:29+00:00",
+    dateIn: formatDate("2021-07-28T13:38:29+00:00"),
     emailAddress: "amytwele@gmail.com",
     fmhvCatalog: null,
     fmhvCategory: "Spring",

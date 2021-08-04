@@ -73,7 +73,7 @@ getListOrders().then((data) => {
     data.orders.forEach(function (order) {
       orderIDList.push(order.id);
     });
-    console.log(orderIDList);
+    // console.log(orderIDList);
     return orderIDList;
   } catch (err) {
     console.error(err);
