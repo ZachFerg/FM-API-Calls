@@ -153,5 +153,7 @@ request.post(
   },
   function (error, response, body) {
     // console.log(body);
+    console.log(response)
+      // .send(result.affectedRows + " orders were added to the database");
   }
 );

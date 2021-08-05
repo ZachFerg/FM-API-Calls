@@ -34,23 +34,23 @@ app.get("/loroco_test", (request, response) => {
 });
 
 // Add a new order
-app.post("/loroco_test", (request, res) => {
-
+app.post("/loroco_test", (request, response) => {
+  // console.log("inserting order data to DB")
   function bulkInsert(connection, table, objectArray, callback) {
     let keys = Object.keys(objectArray[0]);
-    let values = objectArray.map( obj => keys.map( key => obj[key]));
-    let sql = 'INSERT INTO ' + table + ' (' + keys.join(',') + ') VALUES ?';
+    let values = objectArray.map((obj) => keys.map((key) => obj[key]));
+    let sql = "INSERT INTO " + table + " (" + keys.join(",") + ") VALUES ?";
     connection.query(sql, [values], function (error, results, fields) {
       if (error) callback(error);
-      callback(null, results);
+      return callback(null, results);
     });
   }
-  
-  bulkInsert(connection, 'loroco_test', request.body, (error, response) => {
-    res.send('Order added');
-    console.log(response.affectedRows + " orders were added to the database")
-    if (error) res.send(error);
-    // res.status(200).send(`Order added`);
+
+  bulkInsert(connection, "loroco_test", request.body, (error, result) => {
+    if (error) response.send(error);
+    // console.log(error);
+    return response
+      .status(201)
+      .send(result.affectedRows + " orders were added to the database");
   });
-  
 });
