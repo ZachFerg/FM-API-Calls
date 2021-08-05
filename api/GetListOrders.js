@@ -1,4 +1,4 @@
-require('dotenv').config({path: '../.ENV'})
+require("dotenv").config({ path: "../.ENV" });
 const axios = require("axios");
 
 function formatDate(date) {
@@ -32,7 +32,7 @@ Object.keys(params).forEach((key) =>
   param_url.searchParams.append(key, params[key])
 );
 
-console.log(param_url.href)
+console.log(param_url.href);
 
 const config = {
   method: "get",
@@ -42,18 +42,18 @@ const config = {
   },
 };
 
-async function getListOrders() {
+async function getAllOrderIds() {
   console.log("Starting Get List Orders call.....");
   try {
     let res = await axios(config);
     if (res.status == 200) {
       // console.log(res.status);
-      console.log("Order Call successful...");
+      console.log("Get List Orders successful...");
     } else if (res.status == 504) {
-      console.log("Order Call timed out, retrying...")
-      getListOrders()
+      console.log("Order Call timed out, retrying...");
+      getListOrders();
     } else {
-      console.log("something weird is happening")
+      console.log("something weird is happening");
     }
     // Don't forget to return something
     return res.data;
@@ -62,12 +62,7 @@ async function getListOrders() {
   }
 }
 
-getListOrders().then((data) => {
-  console.log(
-    "There are a total of " +
-      data.paging.total +
-      " orders for today, grabbing order ID's"
-  );
+async function gatherAllIDs(data) {
   const orderIDList = [];
   try {
     data.orders.forEach(function (order) {
@@ -78,4 +73,18 @@ getListOrders().then((data) => {
   } catch (err) {
     console.error(err);
   }
-});
+}
+
+async function sendOrderList() {
+  data = await getAllOrderIds();
+  let orderIDList = await gatherAllIDs(data);
+  console.log(
+    "There are a total of " +
+      data.paging.total +
+      " orders for today, grabbing order ID's"
+  );
+  return orderIDList;
+}
+
+
+module.exports = { getAllOrderIds, gatherAllIDs, sendOrderList };

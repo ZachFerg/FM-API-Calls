@@ -48,7 +48,6 @@ app.post("/loroco_test", (request, response) => {
 
   bulkInsert(connection, "loroco_test", request.body, (error, result) => {
     if (error) response.send(error);
-    // console.log(error);
     return response
       .status(201)
       .send(result.affectedRows + " orders were added to the database");
