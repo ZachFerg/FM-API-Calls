@@ -25,7 +25,7 @@ const fm_day_before = formatDate(day_before);
 
 // takes url and appends parameters
 const param_url = new URL(
-  "https://api.fotomerchanthv.com/orders?page=1&limit=200&type=all&orderDir=ASC&"
+  "https://api.fotomerchanthv.com/orders?page=1&limit=25&type=all&orderDir=ASC&"
 );
 const params = { from: fm_day_before, to: fm_yesterday };
 Object.keys(params).forEach((key) =>
@@ -47,7 +47,6 @@ async function getAllOrderIds() {
   try {
     let res = await axios(config);
     if (res.status == 200) {
-      // console.log(res.status);
       console.log("Get List Orders successful...");
     } else if (res.status == 504) {
       console.log("Order Call timed out, retrying...");
@@ -55,7 +54,6 @@ async function getAllOrderIds() {
     } else {
       console.log("something weird is happening");
     }
-    // Don't forget to return something
     return res.data;
   } catch (err) {
     console.error(err);
@@ -68,7 +66,6 @@ async function gatherAllIDs(data) {
     data.orders.forEach(function (order) {
       orderIDList.push(order.id);
     });
-    // console.log(orderIDList);
     return orderIDList;
   } catch (err) {
     console.error(err);
@@ -85,6 +82,5 @@ async function sendOrderList() {
   );
   return orderIDList;
 }
-
 
 module.exports = { getAllOrderIds, gatherAllIDs, sendOrderList };

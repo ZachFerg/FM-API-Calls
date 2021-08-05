@@ -3,10 +3,8 @@ const axios = require("axios");
 const request = require("request");
 const getListOrders = require("./GetListOrders");
 
-// const orderIDList = getListOrders.orderIDList;
-
 const orders = [];
-const undefinedOrders = [];
+const badIDs = [];
 
 function formatDate(date) {
   var d = new Date(date),
@@ -99,37 +97,68 @@ async function processOrders(data, payload) {
       console.log(
         "order " + data.order.id + " is being added to a list to show later"
       );
-      undefinedOrders.push(data.order.id);
-      return undefinedOrders;
+      badIDs.push(data.order.id);
+      return badIDs;
     } else {
       console.log("it's not a TypeError");
     }
+  } finally {
+    undefinedOrders = [];
+    undefinedOrders = badIDs;
+    return { orders: orders, undefinedOrders: undefinedOrders };
   }
 }
 
-async function sendResults(undefinedOrders, orderIDList) {
-  for (let i = 0; i < orderIDList.length; i++) {
-    let order_id = orderIDList[i];
-    data = await getOrderLab(order_id);
-    let result = await processOrders(data);
-  }
-  // console.log(
-  //   "Posting to Database, the number of undefined orders was: ",
-  //   undefinedOrders.length
-  // );
-  request.post(
-    {
-      url: "http://localhost:3000/loroco_test",
-      body: orders,
-      json: true,
-    },
-    function (error, response, body) {
-      console.log(body);
+async function sendResults(orderIDList) {
+  try {
+    for (let i = 0; i < orderIDList.length; i++) {
+      let order_id = orderIDList[i];
+      data = await getOrderLab(order_id);
+      let { result, undefinedOrders } = await processOrders(data);
     }
-  );
+  } catch (err) {
+    console.error(err);
+  } finally {
+    request.post(
+      {
+        url: "http://localhost:3000/loroco_test",
+        body: orders,
+        json: true,
+      },
+      function (error, response, body) {
+        // console.log(body);
+      },
+      console.log(
+        "Posting to Database, the number of undefined orders was: ",
+        undefinedOrders.length
+      )
+    );
+  }
 }
+
+// async function sendResults(undefinedOrders, orderIDList) {
+//   let badIDs = undefinedOrders
+//   for (let i = 0; i < orderIDList.length; i++) {
+//     let order_id = orderIDList[i];
+//     data = await getOrderLab(order_id);
+//     let result = await processOrders(data);
+//   }
+//   console.log(
+//     "Posting to Database, the number of undefined orders was: ",
+//     badIDs.length
+//   );
+//   request.post(
+//     {
+//       url: "http://localhost:3000/loroco_test",
+//       body: orders,
+//       json: true,
+//     },
+//     function (error, response, body) {
+//       console.log(body);
+//     }
+//   );
+// }
 
 // sendResults(undefinedOrders);
-
 
 module.exports = { getOrderLab, processOrders, sendResults };

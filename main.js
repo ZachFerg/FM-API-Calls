@@ -35,7 +35,6 @@ app.get("/loroco_test", (request, response) => {
 
 // Add a new order
 app.post("/loroco_test", (request, response) => {
-  // console.log("inserting order data to DB")
   function bulkInsert(connection, table, objectArray, callback) {
     let keys = Object.keys(objectArray[0]);
     let values = objectArray.map((obj) => keys.map((key) => obj[key]));
@@ -48,6 +47,7 @@ app.post("/loroco_test", (request, response) => {
 
   bulkInsert(connection, "loroco_test", request.body, (error, result) => {
     if (error) response.send(error);
+    console.log(result.affectedRows + " orders were added to the database")
     return response
       .status(201)
       .send(result.affectedRows + " orders were added to the database");
