@@ -21,7 +21,7 @@ function formatDate(date) {
 async function getOrderLab(order_id) {
   console.log("Starting Get Order Lab call.....");
   let param_url = new URL(
-    `https://api.fotomerchanthv.com/orders/${order_id}/lab`
+    `https://api.fotomerchanthv.com/orders/${order_id}`
   );
 
   const config = {
@@ -45,7 +45,23 @@ async function getOrderLab(order_id) {
 
 async function processOrders(data, payload) {
   let result;
+  // will eventually find a better way to do this, for now using optional chaining and nullish coalescing to set values
+  // to null if the object can't be found.
+  const studentFirstName = data.order?.subject?.firstName ?? null;
+  const studentLastName = data.order?.subject?.password ?? null;
+  const studentID = data.order?.subject?.subjectId ?? null;
+  const grade = data.order?.subject?.grade ?? null;
+  const onlineCode = data.order?.subject?.password ?? null;
+  const teacher = data.order?.subject?.teacher ?? null;
+  const homeAddress = data.order?.shippingAddress?.address1 ?? null;
+  const homeCity = data.order?.shippingAddress?.city ?? null;
+  const homePhone1 = data.order?.shippingAddress?.phone ?? null;
+  const homeState = data.order?.shippingAddress?.stateLabel ?? null;
+  const homeZip = data.order?.shippingAddress?.zipCode ?? null;
+  const parentFirstName = data.order?.shippingAddress?.firstName ?? null;
+  const parentLastName = data.order?.shippingAddress?.lastName ?? null;
 
+  // const studentLastName = data.order?.subject?.firstName ?? data.order.orderFormEntrys[0].values["FAIWPO2NJ4-E9K-PL1I0Y"];
   try {
     const finalPayload = {
       orderID: data.order.id,
@@ -65,34 +81,35 @@ async function processOrders(data, payload) {
       fmhvShipCost: data.order.shippingTotal,
       fmhvStage: data.order.clientSessionStage.label,
       fmhvTotal: data.order.total,
-      grade: data.order.subject.grade,
+      grade: grade,
       graduationYear: null, // Will revisit this one after first pass
-      homeAddress: data.order.shippingAddress.address1,
+      homeAddress: homeAddress,
       homeAddress2: null, // Will revisit this one after first pass
-      homeCity: data.order.shippingAddress.city,
-      homePhone1: data.order.shippingAddress.phone,
-      homeState: data.order.shippingAddress.stateLabel,
-      homeZip: data.order.shippingAddress.zipCode,
+      homeCity: homeCity,
+      homePhone1: homePhone1,
+      homeState: homeState,
+      homeZip: homeZip,
       namesOnPrints: null, // Will revisit this one after first pass
-      OnlineCode: data.order.subject.password,
-      parentFirstName: data.order.shippingAddress.firstName,
-      parentLastName: data.order.shippingAddress.firstName,
+      OnlineCode: onlineCode,
+      parentFirstName: parentFirstName,
+      parentLastName: parentLastName,
       referenceNumber: data.order.orderReference,
       relationshipToStudent: null,
       seasonExternalReference:
         data.order.clientSession.season.externalReference,
       shippingDiscount: data.order.couponDiscountTotal,
       shippingMethod: null, // Will revisit this one after first pass
-      studentFirstName: data.order.subject.firstName,
-      studentID: data.order.subject.subjectId,
-      studentLastName: data.order.subject.lastName,
-      teacher: data.order.subject.teacher,
+      studentFirstName: studentFirstName,
+      studentID: studentID,
+      studentLastName: studentLastName,
+      teacher: teacher,
       TM: data.order.clientSession.client.territoryCode,
     };
     orders.push(finalPayload);
     return orders;
   } catch (err) {
     if ((err.name = "TypeError")) {
+      console.log(err)
       console.log("Looks like that order didn't have all the objects needed");
       console.log(
         "order " + data.order.id + " is being added to a list to show later"
@@ -135,30 +152,5 @@ async function sendResults(orderIDList) {
     );
   }
 }
-
-// async function sendResults(undefinedOrders, orderIDList) {
-//   let badIDs = undefinedOrders
-//   for (let i = 0; i < orderIDList.length; i++) {
-//     let order_id = orderIDList[i];
-//     data = await getOrderLab(order_id);
-//     let result = await processOrders(data);
-//   }
-//   console.log(
-//     "Posting to Database, the number of undefined orders was: ",
-//     badIDs.length
-//   );
-//   request.post(
-//     {
-//       url: "http://localhost:3000/loroco_test",
-//       body: orders,
-//       json: true,
-//     },
-//     function (error, response, body) {
-//       console.log(body);
-//     }
-//   );
-// }
-
-// sendResults(undefinedOrders);
 
 module.exports = { getOrderLab, processOrders, sendResults };

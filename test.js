@@ -1,16 +1,6 @@
-//   let data = {
-//   order: {
-//     id: "01FBG2PXN313G74YSN1KRPMPVY",
-//     recipientName: "Jennifer Hale",
-//     recipientEmail: "email1@gmail.com",
-//     // subject: {
-//     //   firstName: "Lillie",
-//     //   lastName: "Hale",
-//     //   email: "email@gmail.com",
-//     //   grade: 6,
-//     // },
-//   },
-// };
+// require("@babel/core").transformSync("code", {
+//   plugins: ["@babel/plugin-proposal-optional-chaining"],
+// });
 
 // if (data && data["order"] && data["order"]["subject"]) {
 //   console.log("we have all the objects");
@@ -31,34 +21,62 @@
 //   }
 // }
 
+const data = {
+  order: {
+    id: "01FBG2PXN313G74YSN1KRPMPVY",
+    recipientName: "Jennifer Hale",
+    recipientEmail: "email1@gmail.com",
+    orderFormEntrys: [
+      {
+        form: {
+          title: "please enter your player's information",
+          label: "sports",
+        },
+        values: {
+          "FAIWPO2NJ4-E9K-PL1I0Y": "Cayley", // studentFirstName
+          "FAIWV436HI-I07-DO5SSQ": "Gibson", // studentLastName
+          "FAIWV4374O-PR4-84T6NU": "Pisgah", // Teacher
+        },
+      },
+    ],
+  },
+};
 
+// // foo === null || foo === void 0 ? void 0 : foo.bar;
 
+const personName = data.order?.subject?.firstName ?? data.order.orderFormEntrys[0].values["FAIWPO2NJ4-E9K-PL1I0Y"];
+console.log(personName)
 
+// const foo = null ?? 'default string';
+// console.log(foo);
 
+// console.log(data.order.orderFormEntrys[0].values["FAIWPO2NJ4-E9K-PL1I0Y"]);
 
-// console.log('Start')
+// const personName = data.order.orderFormEntrys[0].values["FAIWPO2NJ4-E9K-PL1I0Y"]  // works
+// const personName = data.order.subject.firstName || 'no name'; // data.order.orderFormEntrys[0].values["FAIWPO2NJ4-E9K-PL1I0Y"]  // works
+// console.log(personName)
 
-// Promise.resolve('Promise Resolved :D')
-//   .then(res => console.log(res))
+// let promise = new Promise(function(resolve, reject) {
+//   setTimeout(() => resolve("done!"), 1000);
+// });
 
-// console.log('End')
+// // resolve runs the first function in .then
+// promise.then(
+//   result => console.log(result), // shows "done!" after 1 second
+//   error => console.log(error) // doesn't run
+// );
 
+// const response = {
+//   data: {
+//     // temperature: {
+//     //   current: 68,
+//     //   high: 79,
+//     //   low: 45
+//     // },
+//     averageWindSpeed: 8
+//   }
+// }
 
-
-
-
-
-
-// Async/Await 
-
-const one = () => Promise.resolve('One!')
-
-async function myFunc() {
-  console.log("in a function!")
-  const res = await one()
-  console.log(res)
-}
-
-console.log("Before function!")
-myFunc();
-console.log('After function!')
+// // const highTemperature = response.data.temperature.current;
+// const highTemperature = response.data?.temperature?.high;
+// console.log(highTemperature);
