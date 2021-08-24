@@ -9,7 +9,8 @@ const app = express();
 const hostname = "127.0.0.1";
 const port = 3000;
 
-app.use(express.json());
+// app.use(express.json());
+app.use(express.json({limit: '50mb'}));
 
 // app.use('/', apiRoutes)
 

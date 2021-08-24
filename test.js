@@ -1,82 +1,77 @@
-// require("@babel/core").transformSync("code", {
-//   plugins: ["@babel/plugin-proposal-optional-chaining"],
-// });
+require("dotenv").config();
+const axios = require("axios");
 
-// if (data && data["order"] && data["order"]["subject"]) {
-//   console.log("we have all the objects");
-// } else {
-//   console.log("we are missing something");
-//   if (data["order"]["subject"]) {
-//     console.log("we have the order.subject Object");
-//   } else {
-//     console.log("we do not have the order.subject Object");
-//     subject = {
-//       subject: {
-//         grade: null,
-//         firstName: null,
-//       },
-//     };
-//     let merged = { ...data, ...subject };
-//     console.log(merged);
-//   }
-// }
+function formatDate(date) {
+  var d = new Date(date),
+    month = "" + (d.getMonth() + 1),
+    day = "" + d.getDate(),
+    year = d.getFullYear();
 
-const data = {
-  order: {
-    id: "01FBG2PXN313G74YSN1KRPMPVY",
-    recipientName: "Jennifer Hale",
-    recipientEmail: "email1@gmail.com",
-    orderFormEntrys: [
-      {
-        form: {
-          title: "please enter your player's information",
-          label: "sports",
-        },
-        values: {
-          "FAIWPO2NJ4-E9K-PL1I0Y": "Cayley", // studentFirstName
-          "FAIWV436HI-I07-DO5SSQ": "Gibson", // studentLastName
-          "FAIWV4374O-PR4-84T6NU": "Pisgah", // Teacher
-        },
-      },
-    ],
+  if (month.length < 2) month = "0" + month;
+  if (day.length < 2) day = "0" + day;
+
+  return [year, month, day].join("-");
+}
+
+const today = new Date();
+const yesterday = new Date(today);
+const day_before = new Date(today);
+
+yesterday.setDate(yesterday.getDate() - 1);
+day_before.setDate(day_before.getDate() - 2);
+
+const fm_yesterday = formatDate(yesterday);
+const fm_day_before = formatDate(day_before);
+
+// takes url and appends parameters
+const param_url = new URL(
+  `https://api.fotomerchanthv.com/orders?limit=50&type=all&orderDir=ASC&`
+);
+const params = { from: fm_day_before, to: fm_yesterday };
+Object.keys(params).forEach((key) =>
+  param_url.searchParams.append(key, params[key])
+);
+
+console.log(param_url.href);
+
+const config = {
+  method: "get",
+  headers: {
+    Authorization: process.env.FM_API_KEY,
   },
 };
 
-// // foo === null || foo === void 0 ? void 0 : foo.bar;
+async function getAllOrderIds() {
+  console.log("Starting Get List Orders call.....");
 
-const personName = data.order?.subject?.firstName ?? data.order.orderFormEntrys[0].values["FAIWPO2NJ4-E9K-PL1I0Y"];
-console.log(personName)
+  let repo = null, page_count = 1, results = [];
+  do {
+      repo = await axios.get(`${param_url.href}&page=${page_count++}`, config);
+      console.log(repo.data.paging)
+      results = results.concat(repo.data.orders);
+  // } while(repo.data.paging.page < repo.data.paging.last)
+  } while(repo.data.paging.page < 1)
 
-// const foo = null ?? 'default string';
-// console.log(foo);
+  return results
+}
 
-// console.log(data.order.orderFormEntrys[0].values["FAIWPO2NJ4-E9K-PL1I0Y"]);
+async function gatherAllIDs(data) {
+  const orderIDList = [];
+  try {
+    data.forEach(function (order) {
+      orderIDList.push(order.id);
+    });
+    return orderIDList;
+  } catch (err) {
+    console.error(err);
+  }
+  console.log(orderIDList)
+}
 
-// const personName = data.order.orderFormEntrys[0].values["FAIWPO2NJ4-E9K-PL1I0Y"]  // works
-// const personName = data.order.subject.firstName || 'no name'; // data.order.orderFormEntrys[0].values["FAIWPO2NJ4-E9K-PL1I0Y"]  // works
-// console.log(personName)
+async function sendOrderList() {
+  data = await getAllOrderIds();
+  let orderIDList = await gatherAllIDs(data);
+  return orderIDList;
+}
 
-// let promise = new Promise(function(resolve, reject) {
-//   setTimeout(() => resolve("done!"), 1000);
-// });
-
-// // resolve runs the first function in .then
-// promise.then(
-//   result => console.log(result), // shows "done!" after 1 second
-//   error => console.log(error) // doesn't run
-// );
-
-// const response = {
-//   data: {
-//     // temperature: {
-//     //   current: 68,
-//     //   high: 79,
-//     //   low: 45
-//     // },
-//     averageWindSpeed: 8
-//   }
-// }
-
-// // const highTemperature = response.data.temperature.current;
-// const highTemperature = response.data?.temperature?.high;
-// console.log(highTemperature);
+sendOrderList()
