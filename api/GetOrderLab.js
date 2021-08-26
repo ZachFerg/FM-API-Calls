@@ -2,7 +2,7 @@ require("dotenv").config({ path: "../.ENV" });
 const axios = require("axios");
 const request = require("request");
 const getListOrders = require("./GetListOrders");
-const helpers = require("../helpers/optionObjects");
+const helperOBJ = require("../helpers/optionObjects");
 
 const orders = [];
 
@@ -10,14 +10,14 @@ function formatRelationship(string) {
   studString = string;
   result = studString.replace(
     studString,
-    (m) => helpers.studentRelationship[m]
+    (m) => helperOBJ.studentRelationship[m]
   );
   return result;
 }
 
 function formatGrade(string) {
   gradeString = string;
-  result = gradeString.replace(gradeString, (m) => helpers.gradeMap[m]);
+  result = gradeString.replace(gradeString, (m) => helperOBJ.gradeMap[m]);
   return result;
 }
 
@@ -77,7 +77,7 @@ async function processOrders(data) {
   const fmhvShipCost = data?.order?.shippingTotal ?? null;
   const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
   const fmhvTotal = data?.order?.total ?? null;
-  const grade = data?.order?.subject?.grade ?? "PK";
+  const grade = data?.order?.subject?.grade ?? "U";
   const graduationYear = null; // Will revisit this one after first pass
   const homeAddress = data?.order?.shippingAddress?.address1 ?? null;
   const homeAddress2 = null; // Will revisit this one after first pass
@@ -90,7 +90,7 @@ async function processOrders(data) {
   const parentFirstName = data?.order?.shippingAddress?.firstName ?? null;
   const parentLastName = data?.order?.shippingAddress?.lastName ?? null;
   const referenceNumber = data?.order?.orderReference ?? null;
-  const relationshipToStudent = "GR"; // Will revisit this one after first pass, need form values
+  const relationshipToStudent = "U"; // Will revisit this one after first pass, need form values
   const seasonExternalReference =
     data?.order?.clientSession?.season?.externalReference ?? null;
   const shippingDiscount = data?.order?.couponDiscountTotal ?? null;
