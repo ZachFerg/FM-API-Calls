@@ -1,15 +1,31 @@
 # FM-API-Calls
 
-## Order of Calls
+Beginning of automating pulling down orders from the [Fotomerchant API](https://apidocs.fotomerchanthv.com/#50f62df8-f1b7-b697-f8d7-e55862e6e390).
 
-We will need to know the client ID from FotoMerchant in order to make the next call
+The script is very simple:
+- Make a list orders call of everything from yesterday
+- Loop through the pagination and collect all order ID's
+- Loop through the order ID's and make the Get Order (Lab) call
+- Create a payload of information from each response
+- Bulk insert into a database
 
-##### [Get List Orders](https://apidocs.fotomerchanthv.com/#50f62df8-f1b7-b697-f8d7-e55862e6e390)
-> `https://api.fotomerchanthv.com/orders?page=1&limit=100&type=all&orderDir=DESC&supplierStatuses=READY_FOR_SUPPLIER`
-> This will return all of the objects for orders
+### Required:
 
-We will need to loop through every object to grab `order.id` for the next call
+- `.ENV file `
+Your .ENV should contain the following information, email Zach.Ferguson@strawbridge.net for credentials if you do not have them.
 
-##### [Get Order (Lab)](https://apidocs.fotomerchanthv.com/#98583907-3094-57d8-0fbe-ae1c5c566b12)
-> `https://api.fotomerchanthv.com/orders/EYVADV8OF0-RH7-1Z5VR2/lab`
-> This is will give us all order information 
+```
+    NODE_ENV=
+    FM_API_KEY=
+    DB_HOST=
+    DB_USER=
+    DB_PASSWORD=
+    DB_NAME=
+```
+
+### To Run:
+`git clone https://github.com/ZachFerg/FM-API-Calls.git`
+`cd FM-API-Calls`
+`npm install` 
+`node main.js` to start the server
+`node getTodaysOrders.js` to run the orders script
