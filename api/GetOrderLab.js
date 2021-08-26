@@ -4,7 +4,48 @@ const request = require("request");
 const getListOrders = require("./GetListOrders");
 
 const orders = [];
-const badIDs = [];
+
+// added the U in case we get back an undefined value from the response
+// will default to a U if the value is null/undefined
+const studentRelationship = {
+  M: "Mother",
+  F: "Father",
+  GR: "Grandparent",
+  G: "Guardian",
+  O: "Other",
+  U: "Unknown",
+};
+
+const gradeMap = {
+  HS: "Head Start",
+  PK: "Pre Kindergarten",
+  K: "Kindergarten",
+  1: "01",
+  2: "02",
+  3: "03",
+  4: "04",
+  5: "05",
+  6: "06",
+  7: "07",
+  8: "08",
+  9: "09",
+  10: "10",
+  11: "11",
+  12: "12",
+  U: "Unknown",
+};
+
+function formatRelationship(string) {
+  studString = string;
+  result = studString.replace(studString, (m) => studentRelationship[m]);
+  return result;
+}
+
+function formatRelationship(string) {
+  gradeString = string;
+  result = gradeString.replace(gradeString, (m) => gradeMap[m]);
+  return result;
+}
 
 function formatDate(date) {
   var d = new Date(date),
@@ -20,9 +61,7 @@ function formatDate(date) {
 
 async function getOrderLab(order_id) {
   console.log("Starting Get Order Lab call for: ", order_id);
-  let param_url = new URL(
-    `https://api.fotomerchanthv.com/orders/${order_id}`
-  );
+  let param_url = new URL(`https://api.fotomerchanthv.com/orders/${order_id}`);
 
   const config = {
     method: "get",
@@ -43,49 +82,50 @@ async function getOrderLab(order_id) {
   }
 }
 
-async function processOrders(data, payload) {
-
+async function processOrders(data) {
+  // will eventually find a better way of doing this, but for now...
   const orderID = data?.order?.id ?? null;
   const _fknShootNumber = data?.order?.clientSession?.externalReference ?? null;
-  const _fktCustomerNo = data?.order?.clientSession?.client?.externalReference ?? null;
-  const _fktPackage = null // Will revisit this one after first pass
+  const _fktCustomerNo =
+    data?.order?.clientSession?.client?.externalReference ?? null;
+  const _fktPackage = null; // Will revisit this one after first pass
   const clientName = data?.order?.clientSession?.client?.label ?? null;
   const customerName = data?.order?.recipientName ?? null;
   const dateIn = data?.order?.createdAt ?? null;
   const emailAddress = data?.order?.recipientEmail ?? null;
-  const fmhvCategory = data?.order?.clientSession?.clientSessionCategory?.label ?? null;
+  const fmhvCategory =
+    data?.order?.clientSession?.clientSessionCategory?.label ?? null;
   const fmhvPackageCost = data?.order?.subTotal ?? null;
   const fmhvPaymentMethod = data?.order?.paymentMethod ?? null;
   const fmhvSeason = data?.order?.clientSession?.season?.label ?? null;
   const fmhvSession = data?.order?.clientSession?.label ?? null;
-  const fmhvShipCode =  null// Will revisit this one after first pass
+  const fmhvShipCode = null; // Will revisit this one after first pass
   const fmhvShipCost = data?.order?.shippingTotal ?? null;
   const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
   const fmhvTotal = data?.order?.total ?? null;
-  const grade = data?.order?.subject?.grade ?? null;
-  const graduationYear = null  // Will revisit this one after first pass
+  const grade = data?.order?.subject?.grade ?? "U";
+  const graduationYear = null; // Will revisit this one after first pass
   const homeAddress = data?.order?.shippingAddress?.address1 ?? null;
-  const homeAddress2 = null  // Will revisit this one after first pass
+  const homeAddress2 = null; // Will revisit this one after first pass
   const homeCity = data?.order?.shippingAddress?.city ?? null;
   const homePhone1 = data?.order?.shippingAddress?.phone ?? null;
   const homeState = data?.order?.shippingAddress?.stateLabel ?? null;
   const homeZip = data?.order?.shippingAddress?.zipCode ?? null;
-  const namesOnPrints = null // Will revisit this one after first pass
+  const namesOnPrints = null; // Will revisit this one after first pass
   const onlineCode = data?.order?.subject?.password ?? null;
   const parentFirstName = data?.order?.shippingAddress?.firstName ?? null;
   const parentLastName = data?.order?.shippingAddress?.lastName ?? null;
   const referenceNumber = data?.order?.orderReference ?? null;
-  const relationshipToStudent = null // Will revisit this one after first pass
-  const seasonExternalReference = data?.order?.clientSession?.season?.externalReference ?? null;
+  const relationshipToStudent = "U"; // Will revisit this one after first pass
+  const seasonExternalReference =
+    data?.order?.clientSession?.season?.externalReference ?? null;
   const shippingDiscount = data?.order?.couponDiscountTotal ?? null;
-  const shippingMethod = null  // Will revisit this one after first pass
+  const shippingMethod = null; // Will revisit this one after first pass
   const studentFirstName = data?.order?.subject?.firstName ?? null;
   const studentID = data?.order?.subject?.subjectId ?? null;
-  const studentLastName = data?.order?.subject?.password ?? null;
+  const studentLastName = data?.order?.subject?.lastName ?? null;
   const teacher = data?.order?.subject?.teacher ?? null;
   const TM = data?.order?.clientSession?.client?.territoryCode ?? null;
-
-  let result;
 
   try {
     const finalPayload = {
@@ -112,14 +152,14 @@ async function processOrders(data, payload) {
       homeAddress2: homeAddress2,
       homeCity: homeCity,
       homePhone1: homePhone1,
-      homeState:homeState,
+      homeState: homeState,
       homeZip: homeZip,
       namesOnPrints: namesOnPrints,
       onlineCode: onlineCode,
       parentFirstName: parentFirstName,
       parentLastName: parentLastName,
       referenceNumber: referenceNumber,
-      relationshipToStudent: relationshipToStudent,
+      relationshipToStudent: formatRelationship(relationshipToStudent),
       seasonExternalReference: seasonExternalReference,
       shippingDiscount: shippingDiscount,
       shippingMethod: shippingMethod,
@@ -127,18 +167,13 @@ async function processOrders(data, payload) {
       studentID: studentID,
       studentLastName: studentLastName,
       teacher: teacher,
-      TM: TM
+      TM: TM,
     };
     orders.push(finalPayload);
-    return orders;
   } catch (err) {
-      console.log(err)
-      badIDs.push(data.order.id);
-      return badIDs;
+    console.log(err);
   } finally {
-    undefinedOrders = [];
-    undefinedOrders = badIDs;
-    return { orders: orders, undefinedOrders: undefinedOrders };
+    return orders;
   }
 }
 
@@ -147,7 +182,7 @@ async function sendResults(orderIDList) {
     for (let i = 0; i < orderIDList.length; i++) {
       let order_id = orderIDList[i];
       data = await getOrderLab(order_id);
-      let { result, undefinedOrders } = await processOrders(data);
+      let orders = await processOrders(data);
     }
   } catch (err) {
     console.error(err);
@@ -163,10 +198,7 @@ async function sendResults(orderIDList) {
         console.log(response);
         console.log(error);
       },
-      console.log(
-        "Posting to Database, the number of undefined orders was: ",
-        undefinedOrders.length
-      )
+      console.log("Posting to Database")
     );
   }
 }
