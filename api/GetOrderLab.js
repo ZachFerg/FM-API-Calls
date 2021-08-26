@@ -2,48 +2,22 @@ require("dotenv").config({ path: "../.ENV" });
 const axios = require("axios");
 const request = require("request");
 const getListOrders = require("./GetListOrders");
+const helpers = require("../helpers/optionObjects");
 
 const orders = [];
 
-// added the U in case we get back an undefined value from the response
-// will default to a U if the value is null/undefined
-const studentRelationship = {
-  M: "Mother",
-  F: "Father",
-  GR: "Grandparent",
-  G: "Guardian",
-  O: "Other",
-  U: "Unknown",
-};
-
-const gradeMap = {
-  HS: "Head Start",
-  PK: "Pre Kindergarten",
-  K: "Kindergarten",
-  1: "01",
-  2: "02",
-  3: "03",
-  4: "04",
-  5: "05",
-  6: "06",
-  7: "07",
-  8: "08",
-  9: "09",
-  10: "10",
-  11: "11",
-  12: "12",
-  U: "Unknown",
-};
-
 function formatRelationship(string) {
   studString = string;
-  result = studString.replace(studString, (m) => studentRelationship[m]);
+  result = studString.replace(
+    studString,
+    (m) => helpers.studentRelationship[m]
+  );
   return result;
 }
 
-function formatRelationship(string) {
+function formatGrade(string) {
   gradeString = string;
-  result = gradeString.replace(gradeString, (m) => gradeMap[m]);
+  result = gradeString.replace(gradeString, (m) => helpers.gradeMap[m]);
   return result;
 }
 
@@ -103,7 +77,7 @@ async function processOrders(data) {
   const fmhvShipCost = data?.order?.shippingTotal ?? null;
   const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
   const fmhvTotal = data?.order?.total ?? null;
-  const grade = data?.order?.subject?.grade ?? "U";
+  const grade = data?.order?.subject?.grade ?? "PK";
   const graduationYear = null; // Will revisit this one after first pass
   const homeAddress = data?.order?.shippingAddress?.address1 ?? null;
   const homeAddress2 = null; // Will revisit this one after first pass
@@ -111,12 +85,12 @@ async function processOrders(data) {
   const homePhone1 = data?.order?.shippingAddress?.phone ?? null;
   const homeState = data?.order?.shippingAddress?.stateLabel ?? null;
   const homeZip = data?.order?.shippingAddress?.zipCode ?? null;
-  const namesOnPrints = null; // Will revisit this one after first pass
+  const namesOnPrints = null; // Will revisit this one after first pass, need form values
   const onlineCode = data?.order?.subject?.password ?? null;
   const parentFirstName = data?.order?.shippingAddress?.firstName ?? null;
   const parentLastName = data?.order?.shippingAddress?.lastName ?? null;
   const referenceNumber = data?.order?.orderReference ?? null;
-  const relationshipToStudent = "U"; // Will revisit this one after first pass
+  const relationshipToStudent = "GR"; // Will revisit this one after first pass, need form values
   const seasonExternalReference =
     data?.order?.clientSession?.season?.externalReference ?? null;
   const shippingDiscount = data?.order?.couponDiscountTotal ?? null;
@@ -146,7 +120,7 @@ async function processOrders(data) {
       fmhvShipCost: fmhvShipCost,
       fmhvStage: fmhvStage,
       fmhvTotal: fmhvTotal,
-      grade: grade,
+      grade: formatGrade(grade),
       graduationYear: graduationYear,
       homeAddress: homeAddress,
       homeAddress2: homeAddress2,
@@ -195,8 +169,8 @@ async function sendResults(orderIDList) {
       },
       function (error, response, body) {
         // console.log(body);
-        console.log(response);
-        console.log(error);
+        // console.log(response);
+        // console.log(error);
       },
       console.log("Posting to Database")
     );

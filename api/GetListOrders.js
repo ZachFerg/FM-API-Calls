@@ -32,8 +32,6 @@ Object.keys(params).forEach((key) =>
   param_url.searchParams.append(key, params[key])
 );
 
-console.log(param_url.href);
-
 const config = {
   method: "get",
   headers: {
@@ -44,15 +42,16 @@ const config = {
 async function getAllOrderIds() {
   console.log("Starting Get List Orders call.....");
 
-  let repo = null, page_count = 1, results = [];
+  let repo = null,
+    page_count = 1,
+    results = [];
   do {
-      repo = await axios.get(`${param_url.href}&page=${page_count++}`, config);
-      console.log(repo.data.paging)
-      results = results.concat(repo.data.orders);
-  // } while(repo.data.paging.page < repo.data.paging.last)
-  } while(repo.data.paging.page < 1)
+    repo = await axios.get(`${param_url.href}&page=${page_count++}`, config);
+    console.log(repo.data.paging);
+    results = results.concat(repo.data.orders);
+  } while (repo.data.paging.page < 1);
 
-  return results
+  return results;
 }
 
 async function gatherAllIDs(data) {
@@ -65,7 +64,7 @@ async function gatherAllIDs(data) {
   } catch (err) {
     console.error(err);
   }
-  console.log(orderIDList)
+  console.log(orderIDList);
 }
 
 async function sendOrderList() {
