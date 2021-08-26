@@ -25,7 +25,7 @@ const fm_day_before = formatDate(day_before);
 
 // takes url and appends parameters
 const param_url = new URL(
-  `https://api.fotomerchanthv.com/orders?limit=10&type=all&orderDir=ASC&`
+  `https://api.fotomerchanthv.com/orders?limit=50&type=all&orderDir=ASC&`
 );
 const params = { from: fm_day_before, to: fm_yesterday };
 Object.keys(params).forEach((key) =>
@@ -49,7 +49,7 @@ async function getAllOrderIds() {
     repo = await axios.get(`${param_url.href}&page=${page_count++}`, config);
     console.log(repo.data.paging);
     results = results.concat(repo.data.orders);
-  } while (repo.data.paging.page < 1);
+  } while (repo.data.paging.page < repo.data.paging.last);
 
   return results;
 }

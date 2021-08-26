@@ -73,14 +73,14 @@ async function processOrders(data) {
   const fmhvPaymentMethod = data?.order?.paymentMethod ?? null;
   const fmhvSeason = data?.order?.clientSession?.season?.label ?? null;
   const fmhvSession = data?.order?.clientSession?.label ?? null;
-  const fmhvShipCode = null; // Will revisit this one after first pass
+  const fmhvShipCode = data?.order?.shippingMethod?.code ?? null; // Will revisit this one after first pass
   const fmhvShipCost = data?.order?.shippingTotal ?? null;
   const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
   const fmhvTotal = data?.order?.total ?? null;
   const grade = data?.order?.subject?.grade ?? "U";
   const graduationYear = null; // Will revisit this one after first pass
   const homeAddress = data?.order?.shippingAddress?.address1 ?? null;
-  const homeAddress2 = null; // Will revisit this one after first pass
+  const homeAddress2 = data?.order?.shippingAddress?.address2 ?? null;
   const homeCity = data?.order?.shippingAddress?.city ?? null;
   const homePhone1 = data?.order?.shippingAddress?.phone ?? null;
   const homeState = data?.order?.shippingAddress?.stateLabel ?? null;
@@ -94,7 +94,7 @@ async function processOrders(data) {
   const seasonExternalReference =
     data?.order?.clientSession?.season?.externalReference ?? null;
   const shippingDiscount = data?.order?.couponDiscountTotal ?? null;
-  const shippingMethod = null; // Will revisit this one after first pass
+  const shippingMethod = data?.order?.shippingMethod?.label ?? null;
   const studentFirstName = data?.order?.subject?.firstName ?? null;
   const studentID = data?.order?.subject?.subjectId ?? null;
   const studentLastName = data?.order?.subject?.lastName ?? null;

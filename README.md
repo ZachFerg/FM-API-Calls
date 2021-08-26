@@ -24,8 +24,8 @@ Your .ENV should contain the following information, email Zach.Ferguson@strawbri
 ```
 
 ### To Run:
-`git clone https://github.com/ZachFerg/FM-API-Calls.git`
-`cd FM-API-Calls`
-`npm install` 
-`node main.js` to start the server
-`node getTodaysOrders.js` to run the orders script
+- `git clone https://github.com/ZachFerg/FM-API-Calls.git`
+- `cd FM-API-Calls`
+- `npm install` 
+- `node main.js` to start the server
+- `node getTodaysOrders.js` to run the orders script
