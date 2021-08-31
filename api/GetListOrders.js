@@ -23,9 +23,12 @@ day_before.setDate(day_before.getDate() - 2);
 const fm_yesterday = formatDate(yesterday);
 const fm_day_before = formatDate(day_before);
 
+// const fm_yesterday = "2021-08-28";
+// const fm_day_before = "2021-08-27";
+
 // takes url and appends parameters
 const param_url = new URL(
-  `https://api.fotomerchanthv.com/orders?limit=50&type=all&orderDir=ASC&`
+  `https://api.fotomerchanthv.com/orders?limit=10&type=all&orderDir=ASC&`
 );
 const params = { from: fm_day_before, to: fm_yesterday };
 Object.keys(params).forEach((key) =>
@@ -39,19 +42,27 @@ const config = {
   },
 };
 
+console.log(param_url.href);
+
 async function getAllOrderIds() {
   console.log("Starting Get List Orders call.....");
 
-  let repo = null,
-    page_count = 1,
-    results = [];
-  do {
-    repo = await axios.get(`${param_url.href}&page=${page_count++}`, config);
-    console.log(repo.data.paging);
-    results = results.concat(repo.data.orders);
-  } while (repo.data.paging.page < repo.data.paging.last);
+  let repo = null;
+  page_count = 1;
+  results = [];
 
-  return results;
+  try {
+    do {
+      repo = await axios.get(`${param_url.href}&page=${page_count++}`, config);
+      console.log(repo.data.paging);
+      results = results.concat(repo.data.orders);
+    } while (repo.data.paging.page < repo.data.paging.last);
+  // } while (repo.data.paging.page < 1);
+
+    return results;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 async function gatherAllIDs(data) {

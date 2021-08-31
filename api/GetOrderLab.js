@@ -77,7 +77,10 @@ async function processOrders(data) {
   const fmhvShipCost = data?.order?.shippingTotal ?? null;
   const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
   const fmhvTotal = data?.order?.total ?? null;
-  const grade = data?.order?.subject?.grade ?? "U";
+  const grade =
+    data?.order?.subject?.grade ??
+    data?.order?.orderFormEntrys[0]?.values["F98OL37WDL-9AM-LVRZG4"] ??
+    "U";
   const graduationYear = null; // Will revisit this one after first pass
   const homeAddress = data?.order?.shippingAddress?.address1 ?? null;
   const homeAddress2 = data?.order?.shippingAddress?.address2 ?? null;
@@ -90,16 +93,28 @@ async function processOrders(data) {
   const parentFirstName = data?.order?.shippingAddress?.firstName ?? null;
   const parentLastName = data?.order?.shippingAddress?.lastName ?? null;
   const referenceNumber = data?.order?.orderReference ?? null;
-  const relationshipToStudent = "U"; // Will revisit this one after first pass, need form values
+  const relationshipToStudent =
+    data?.order?.orderFormEntrys[0]?.values["F99T5BZIXA-QGT-NB2EOO"] ?? "U";
   const seasonExternalReference =
     data?.order?.clientSession?.season?.externalReference ?? null;
   const shippingDiscount = data?.order?.couponDiscountTotal ?? null;
   const shippingMethod = data?.order?.shippingMethod?.label ?? null;
-  const studentFirstName = data?.order?.subject?.firstName ?? null;
+  const studentFirstName =
+    data?.order?.subject?.firstName ??
+    data?.order?.orderFormEntrys[0]?.values["F98OL37Q49-6MA-3EBIV8"] ??
+    null;
   const studentID = data?.order?.subject?.subjectId ?? null;
-  const studentLastName = data?.order?.subject?.lastName ?? null;
-  const teacher = data?.order?.subject?.teacher ?? null;
+  const studentLastName =
+    data?.order?.subject?.lastName ??
+    data?.order?.orderFormEntrys[0]?.values["F99TE8YU8F-R88-CSNKAM"] ??
+    null;
+  const teacher =
+    data?.order?.subject?.teacher ??
+    data?.order?.orderFormEntrys[0]?.values["F98OL37QJ1-Y5M-DPEU7K"] ??
+    null;
   const TM = data?.order?.clientSession?.client?.territoryCode ?? null;
+  const dateCreated = data?.order?.createdAt ?? null;
+  const dateModified = data?.order?.modifiedAt ?? null;
 
   try {
     const finalPayload = {
@@ -142,6 +157,8 @@ async function processOrders(data) {
       studentLastName: studentLastName,
       teacher: teacher,
       TM: TM,
+      dateCreated: formatDate(dateCreated),
+      dateModified: formatDate(dateModified)
     };
     orders.push(finalPayload);
   } catch (err) {
@@ -169,8 +186,8 @@ async function sendResults(orderIDList) {
       },
       function (error, response, body) {
         // console.log(body);
-        // console.log(response);
-        // console.log(error);
+        console.log(response);
+        console.log(error);
       },
       console.log("Posting to Database")
     );
