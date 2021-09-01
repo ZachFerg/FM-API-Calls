@@ -57,12 +57,11 @@ async function getOrderLab(order_id) {
 }
 
 async function processOrders(data) {
-  // will eventually find a better way of doing this, but for now...
   const orderID = data?.order?.id ?? null;
   const _fknShootNumber = data?.order?.clientSession?.externalReference ?? null;
   const _fktCustomerNo =
     data?.order?.clientSession?.client?.externalReference ?? null;
-  const _fktPackage = null; // Will revisit this one after first pass
+  const _fktPackage = null; // FM needs to just give us the syntax for this, not building a function that will inevitably have to be rewritten
   const clientName = data?.order?.clientSession?.client?.label ?? null;
   const customerName = data?.order?.recipientName ?? null;
   const dateIn = data?.order?.createdAt ?? null;
@@ -73,7 +72,7 @@ async function processOrders(data) {
   const fmhvPaymentMethod = data?.order?.paymentMethod ?? null;
   const fmhvSeason = data?.order?.clientSession?.season?.label ?? null;
   const fmhvSession = data?.order?.clientSession?.label ?? null;
-  const fmhvShipCode = data?.order?.shippingMethod?.code ?? null; // Will revisit this one after first pass
+  const fmhvShipCode = data?.order?.shippingMethod?.code ?? null;
   const fmhvShipCost = data?.order?.shippingTotal ?? null;
   const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
   const fmhvTotal = data?.order?.total ?? null;
@@ -81,17 +80,23 @@ async function processOrders(data) {
     data?.order?.subject?.grade ??
     data?.order?.orderFormEntrys[0]?.values["F98OL37WDL-9AM-LVRZG4"] ??
     "U";
-  const graduationYear = null; // Will revisit this one after first pass
+  const graduationYear =
+    data?.order?.orderItems[0]?.orderItemOptions[1]?.value ?? null;
   const homeAddress = data?.order?.shippingAddress?.address1 ?? null;
   const homeAddress2 = data?.order?.shippingAddress?.address2 ?? null;
   const homeCity = data?.order?.shippingAddress?.city ?? null;
   const homePhone1 = data?.order?.shippingAddress?.phone ?? null;
   const homeState = data?.order?.shippingAddress?.stateLabel ?? null;
   const homeZip = data?.order?.shippingAddress?.zipCode ?? null;
-  const namesOnPrints = null; // Will revisit this one after first pass, need form values
   const onlineCode = data?.order?.subject?.password ?? null;
-  const parentFirstName = data?.order?.shippingAddress?.firstName ?? null;
-  const parentLastName = data?.order?.shippingAddress?.lastName ?? null;
+  const parentFirstName =
+    data?.order?.shippingAddress?.firstName ??
+    data?.order?.billingAddress?.firstName ??
+    null;
+  const parentLastName =
+    data?.order?.shippingAddress?.lastName ??
+    data?.order?.billingAddress?.lastName ??
+    null;
   const referenceNumber = data?.order?.orderReference ?? null;
   const relationshipToStudent =
     data?.order?.orderFormEntrys[0]?.values["F99T5BZIXA-QGT-NB2EOO"] ?? "U";
@@ -115,6 +120,11 @@ async function processOrders(data) {
   const TM = data?.order?.clientSession?.client?.territoryCode ?? null;
   const dateCreated = data?.order?.createdAt ?? null;
   const dateModified = data?.order?.modifiedAt ?? null;
+  const namesOnPrints =
+    data?.order?.orderItems[3]?.orderItemOptions[0]?.value ??
+    data?.order?.orderItems[0]?.orderItemOptions[0]?.value ??
+    null;
+  const datePulled = Date.now();
 
   try {
     const finalPayload = {
@@ -158,7 +168,8 @@ async function processOrders(data) {
       teacher: teacher,
       TM: TM,
       dateCreated: formatDate(dateCreated),
-      dateModified: formatDate(dateModified)
+      dateModified: formatDate(dateModified),
+      datePulled: formatDate(datePulled),
     };
     orders.push(finalPayload);
   } catch (err) {

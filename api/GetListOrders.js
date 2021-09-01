@@ -23,12 +23,9 @@ day_before.setDate(day_before.getDate() - 2);
 const fm_yesterday = formatDate(yesterday);
 const fm_day_before = formatDate(day_before);
 
-// const fm_yesterday = "2021-08-28";
-// const fm_day_before = "2021-08-27";
-
 // takes url and appends parameters
 const param_url = new URL(
-  `https://api.fotomerchanthv.com/orders?limit=10&type=all&orderDir=ASC&`
+  `https://api.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&`
 );
 const params = { from: fm_day_before, to: fm_yesterday };
 Object.keys(params).forEach((key) =>
