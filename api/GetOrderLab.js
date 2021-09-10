@@ -1,23 +1,40 @@
 require("dotenv").config({ path: "../.ENV" });
 const axios = require("axios");
 const request = require("request");
-const getListOrders = require("./GetListOrders");
 const helperOBJ = require("../helpers/optionObjects");
 
 const orders = [];
 
 function formatRelationship(string) {
   studString = string;
-  result = studString.replace(
-    studString,
-    (m) => helperOBJ.studentRelationship[m]
-  );
+  if (studString == null) {
+    result = null;
+  } else {
+    result = studString.replace(
+      studString,
+      (m) => helperOBJ.studentRelationship[m]
+    );
+  }
   return result;
 }
 
 function formatGrade(string) {
   gradeString = string;
-  result = gradeString.replace(gradeString, (m) => helperOBJ.gradeMap[m]);
+  if (gradeString == null) {
+    result = null;
+  } else {
+    result = gradeString.replace(gradeString, (m) => helperOBJ.gradeMap[m]);
+  }
+  return result;
+}
+
+function formatSport(string) {
+  sportString = string;
+  if (sportString == null) {
+    result = null;
+  } else {
+    result = sportString.replace(sportString, (m) => helperOBJ.sportsMap[m]);
+  }
   return result;
 }
 
@@ -62,7 +79,10 @@ async function processOrders(data) {
   const _fktCustomerNo =
     data?.order?.clientSession?.client?.externalReference ?? null;
   const _fktPackage = null; // FM needs to just give us the syntax for this, not building a function that will inevitably have to be rewritten
-  const clientName = data?.order?.clientSession?.client?.label ?? null;
+  const clientName =
+    data?.order?.clientSession?.client?.label ??
+    data?.order?.orderFormEntrys[0]?.values["01FDDDZDDT9QHNJZTF98J31X60"] ?? // sports form FAIWPO2JMM-8B2-CW31LJ
+    null;
   const customerName = data?.order?.recipientName ?? null;
   const dateIn = data?.order?.createdAt ?? null;
   const emailAddress = data?.order?.recipientEmail ?? null;
@@ -78,8 +98,8 @@ async function processOrders(data) {
   const fmhvTotal = data?.order?.total ?? null;
   const grade =
     data?.order?.subject?.grade ??
-    data?.order?.orderFormEntrys[0]?.values["F98OL37WDL-9AM-LVRZG4"] ??
-    "U";
+    data?.order?.orderFormEntrys[0]?.values["F98OL37WDL-9AM-LVRZG4"] ?? // school info form
+    null;
   const graduationYear =
     data?.order?.orderItems[0]?.orderItemOptions[1]?.value ?? null;
   const homeAddress = data?.order?.shippingAddress?.address1 ?? null;
@@ -99,23 +119,25 @@ async function processOrders(data) {
     null;
   const referenceNumber = data?.order?.orderReference ?? null;
   const relationshipToStudent =
-    data?.order?.orderFormEntrys[0]?.values["F99T5BZIXA-QGT-NB2EOO"] ?? "U";
+    data?.order?.orderFormEntrys[0]?.values["F99T5BZIXA-QGT-NB2EOO"] ?? null; // school info form F98OL37KKK-RFT-44F87S
   const seasonExternalReference =
     data?.order?.clientSession?.season?.externalReference ?? null;
   const shippingDiscount = data?.order?.couponDiscountTotal ?? null;
   const shippingMethod = data?.order?.shippingMethod?.label ?? null;
   const studentFirstName =
     data?.order?.subject?.firstName ??
-    data?.order?.orderFormEntrys[0]?.values["F98OL37Q49-6MA-3EBIV8"] ??
+    data?.order?.orderFormEntrys[0]?.values["F98OL37Q49-6MA-3EBIV8"] ?? // school info form F98OL37KKK-RFT-44F87S
+    data?.order?.orderFormEntrys[0]?.values["FAIWPO2NJ4-E9K-PL1I0Y"] ?? // sports form FAIWPO2JMM-8B2-CW31LJ
     null;
   const studentID = data?.order?.subject?.subjectId ?? null;
   const studentLastName =
     data?.order?.subject?.lastName ??
-    data?.order?.orderFormEntrys[0]?.values["F99TE8YU8F-R88-CSNKAM"] ??
+    data?.order?.orderFormEntrys[0]?.values["F99TE8YU8F-R88-CSNKAM"] ?? // school info form F98OL37KKK-RFT-44F87S
+    data?.order?.orderFormEntrys[0]?.values["FAIWV436HI-I07-DO5SSQ"] ?? // sports form FAIWPO2JMM-8B2-CW31LJ
     null;
   const teacher =
     data?.order?.subject?.teacher ??
-    data?.order?.orderFormEntrys[0]?.values["F98OL37QJ1-Y5M-DPEU7K"] ??
+    data?.order?.orderFormEntrys[0]?.values["F98OL37QJ1-Y5M-DPEU7K"] ?? // school info form F98OL37KKK-RFT-44F87S
     null;
   const TM = data?.order?.clientSession?.client?.territoryCode ?? null;
   const dateCreated = data?.order?.createdAt ?? null;
@@ -124,7 +146,24 @@ async function processOrders(data) {
     data?.order?.orderItems[3]?.orderItemOptions[0]?.value ??
     data?.order?.orderItems[0]?.orderItemOptions[0]?.value ??
     null;
+  const Age =
+    data?.order?.orderFormEntrys[0]?.values["FBKHP2B4OK-VDG-613IP6"] ?? null; // sports form FAIWPO2JMM-8B2-CW31LJ
+  const Sport =
+    data?.order?.orderFormEntrys[0]?.values["FAIWV436TF-YHV-GXAIEG"] ?? null; // sports form FAIWPO2JMM-8B2-CW31LJ
+  const teamName =
+    data?.order?.orderFormEntrys[0]?.values["FAIWV4374O-PR4-84T6NU"] ?? null; // sports form FAIWPO2JMM-8B2-CW31LJ
+  const Coach =
+    data?.order?.orderFormEntrys[0]?.values["FAIWV437FQ-PAA-9N7GS9"] ?? null; // sports form FAIWPO2JMM-8B2-CW31LJ
+  const JerseyNumber =
+    data?.order?.orderFormEntrys[0]?.values["01EXHTW1QVV693FP129G1R38HE"] ??
+    null; // sports form FAIWPO2JMM-8B2-CW31LJ
+
+  // These will not be from FM response, but we're filling them in regardless
   const datePulled = Date.now();
+  const batchID = null;
+  const automation = null;
+  const lorocoNumber = null;
+  const batchSequence = null;
 
   try {
     const finalPayload = {
@@ -170,6 +209,15 @@ async function processOrders(data) {
       dateCreated: formatDate(dateCreated),
       dateModified: formatDate(dateModified),
       datePulled: formatDate(datePulled),
+      Age: Age,
+      Sport: formatSport(Sport),
+      teamName: teamName,
+      Coach: Coach,
+      JerseyNumber: JerseyNumber,
+      batchID: batchID,
+      automation: automation,
+      lorocoNumber: lorocoNumber,
+      batchSequence: batchSequence,
     };
     orders.push(finalPayload);
   } catch (err) {
@@ -197,7 +245,7 @@ async function sendResults(orderIDList) {
       },
       function (error, response, body) {
         // console.log(body);
-        console.log(response);
+        // console.log(response);
         console.log(error);
       },
       console.log("Posting to Database")

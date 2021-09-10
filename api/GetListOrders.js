@@ -54,7 +54,7 @@ async function getAllOrderIds() {
       console.log(repo.data.paging);
       results = results.concat(repo.data.orders);
     } while (repo.data.paging.page < repo.data.paging.last);
-  // } while (repo.data.paging.page < 1);
+  // } while (repo.data.paging.page < 5);
 
     return results;
   } catch (error) {

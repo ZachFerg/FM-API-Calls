@@ -10,7 +10,7 @@ const hostname = "127.0.0.1";
 const port = 3000;
 
 // app.use(express.json());
-app.use(express.json({limit: '50mb'}));
+app.use(express.json({ limit: "50mb" }));
 
 // app.use('/', apiRoutes)
 
@@ -28,7 +28,7 @@ app.listen(port, () => {
 // Display all orders
 app.get("/loroco_test", (request, response) => {
   console.log("getting all orders");
-  connection.query("SELECT * FROM loroco_test", (error, result) => {
+  connection.query("SELECT * FROM loroco_test LIMIT 50", (error, result) => {
     if (error) throw error;
 
     response.send(result);
@@ -49,9 +49,9 @@ app.post("/loroco_test", (request, response) => {
 
   bulkInsert(connection, "loroco_test", request.body, (error, result) => {
     if (error) response.send(error);
-    console.log(result.affectedRows + " orders were added to the database")
-    return response
-      .status(201)
-      .send(result.affectedRows + " orders were added to the database");
+    // console.log(result.affectedRows + " orders were added to the database")
+    return response.send(
+      result.affectedRows + " orders were added to the database"
+    );
   });
 });

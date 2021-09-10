@@ -37,4 +37,28 @@ const gradeMap = {
   U: "Unknown",
 };
 
-module.exports = { studentRelationship, gradeMap };
+const sportsMap = {
+  BS: "Baseball",
+  BK: "Basketball",
+  CH: "Cheer",
+  XC: "Cross Country",
+  DC: "Dance",
+  FH: "Field Hockey",
+  FB: "Football",
+  GF: "Golf",
+  GM: "Gymnastics",
+  KB: "Kickball",
+  LC: "LaCrosse",
+  MC: "Music",
+  RG: "Rugby",
+  SR: "Soccer",
+  SB: "Softball",
+  SM: "Swim",
+  TN: "Tennis",
+  TK: "Track",
+  VB: "Volleyball",
+  WR: "Wrestling",
+  GC: "Generic",
+};
+
+module.exports = { studentRelationship, gradeMap, sportsMap };
