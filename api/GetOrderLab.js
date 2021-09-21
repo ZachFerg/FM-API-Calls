@@ -50,15 +50,40 @@ function formatDate(date) {
   return [year, month, day].join("-");
 }
 
+function objectLength(obj) {
+  let result = 0;
+  for (let prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      result++;
+    }
+  }
+  return result;
+}
+
+function findTotal(orderLength) {
+  let paperLength = 0;
+  for (let i = 0; i < orderLength; i++) {
+    let width = data?.order?.orderItems[i]?.orderItems[0]?.product?.width ?? 0;
+    let quantity = data?.order?.orderItems[i]?.quantity ?? 0;
+    total = width * quantity;
+    paperLength += total;
+  }
+  return paperLength;
+}
+
 async function getOrderLab(order_id) {
   console.log("Starting Get Order Lab call for: ", order_id);
-  let param_url = new URL(`https://api.fotomerchanthv.com/orders/${order_id}`);
+  // let param_url = new URL(`https://api.fotomerchanthv.com/orders/${order_id}/lab`);
+  let param_url = new URL(
+    `https://api.staging.fotomerchanthv.com/orders/${order_id}/lab`
+  );
 
   const config = {
     method: "get",
     url: param_url.href,
     headers: {
-      Authorization: process.env.FM_API_KEY,
+      // Authorization: process.env.FM_API_KEY,
+      Authorization: process.env.FM_STAGE_API_KEY,
     },
   };
 
@@ -73,6 +98,64 @@ async function getOrderLab(order_id) {
   }
 }
 
+function setBatchCategory(
+  fmhvSeason,
+  shippingMethod,
+  fmhvShipCode,
+  fmhvPaymentMethod,
+  fmhvStage,
+  _fktPackage
+) { 
+  let batchCategory;
+  if (
+    (fmhvSeason !== null && fmhvSeason.includes("Sports")) ||
+    (fmhvSeason !== null && fmhvSeason.includes("Year"))
+  ) {
+    batchCategory = "Main Production";
+  } else if (
+    (shippingMethod !== null && shippingMethod.includes("Pay to Keep")) ||
+    (shippingMethod !== null &&
+      shippingMethod.includes("Plan C Processing Fee")) ||
+    (shippingMethod !== null && shippingMethod.includes("Ship to School"))
+  ) {
+    batchCategory = "Main Production";
+  } else if (shippingMethod === null && fmhvShipCode === null) {
+    // if ordered items CONTAIN O-1, OA-1, O-1;BS*, OA-1;BS*
+    if (
+      (_fktPackage !== null && _fktPackage.includes("O-1")) ||
+      (_fktPackage !== null && _fktPackage.includes("OA-1")) ||
+      (_fktPackage !== null && _fktPackage.includes("O-1;BS")) ||
+      (_fktPackage !== null && _fktPackage.includes("OA-1;BS"))
+    ) {
+      batchCategory = "Main Production ";
+      // if ordered items contains ENTIRE_PKG_* of SPEC_SHEETS*
+    } else if (
+      (_fktPackage !== null && _fktPackage.includes("ENTIRE_PKG_")) ||
+      (_fktPackage !== null && _fktPackage.includes("SPEC_SHEETS"))
+    ) {
+      batchCategory = "Main Production ";
+    }
+  } else if (
+    (fmhvShipCode !== null && fmhvShipCode === "KEEP_NO CHARGE") ||
+    (fmhvShipCode !== null && fmhvShipCode === "PLAN_C_SHIP_HOME")
+  ) {
+    batchCategory = "Main Production";
+  } else if (fmhvPaymentMethod === null) {
+    batchCategory = "Main Production";
+  } else if (fmhvStage !== null && fmhvStage.includes("AUTO")) {
+    // if ordered items CONTAIN AB
+    if (_fktPackage !== null && _fktPackage.includes("AB")) {
+      batchCategory = "Automation Retouch";
+      // if ordered items DOES NOT CONTAIN AB TODO-ZMF
+    } else if (_fktPackage !== null && _fktPackage.includes("")) {
+      batchCategory = "Automation";
+    }
+  } else {
+    batchCategory = "To Loroco";
+  }
+  return batchCategory;
+}
+
 async function processOrders(data) {
   const orderID = data?.order?.id ?? null;
   const _fknShootNumber = data?.order?.clientSession?.externalReference ?? null;
@@ -84,7 +167,6 @@ async function processOrders(data) {
     data?.order?.orderFormEntrys[0]?.values["01FDDDZDDT9QHNJZTF98J31X60"] ?? // sports form FAIWPO2JMM-8B2-CW31LJ
     null;
   const customerName = data?.order?.recipientName ?? null;
-  const dateIn = data?.order?.createdAt ?? null;
   const emailAddress = data?.order?.recipientEmail ?? null;
   const fmhvCategory =
     data?.order?.clientSession?.clientSessionCategory?.label ?? null;
@@ -146,22 +228,31 @@ async function processOrders(data) {
     data?.order?.orderItems[3]?.orderItemOptions[0]?.value ??
     data?.order?.orderItems[0]?.orderItemOptions[0]?.value ??
     null;
-  const Age =
+  const age =
     data?.order?.orderFormEntrys[0]?.values["FBKHP2B4OK-VDG-613IP6"] ?? null; // sports form FAIWPO2JMM-8B2-CW31LJ
-  const Sport =
+  const sport =
     data?.order?.orderFormEntrys[0]?.values["FAIWV436TF-YHV-GXAIEG"] ?? null; // sports form FAIWPO2JMM-8B2-CW31LJ
   const teamName =
     data?.order?.orderFormEntrys[0]?.values["FAIWV4374O-PR4-84T6NU"] ?? null; // sports form FAIWPO2JMM-8B2-CW31LJ
-  const Coach =
+  const coach =
     data?.order?.orderFormEntrys[0]?.values["FAIWV437FQ-PAA-9N7GS9"] ?? null; // sports form FAIWPO2JMM-8B2-CW31LJ
-  const JerseyNumber =
+  const jerseyNumber =
     data?.order?.orderFormEntrys[0]?.values["01EXHTW1QVV693FP129G1R38HE"] ??
     null; // sports form FAIWPO2JMM-8B2-CW31LJ
+  const orderLength = objectLength(data?.order?.orderItems);
+  const paperLength = findTotal(orderLength);
 
   // These will not be from FM response, but we're filling them in regardless
   const datePulled = Date.now();
   const batchID = null;
-  const automation = null;
+  const batchCategory = setBatchCategory(
+    fmhvSeason,
+    shippingMethod,
+    fmhvShipCode,
+    fmhvPaymentMethod,
+    fmhvStage,
+    _fktPackage
+  );
   const lorocoNumber = null;
   const batchSequence = null;
 
@@ -173,7 +264,6 @@ async function processOrders(data) {
       _fktPackage: _fktPackage,
       clientName: clientName,
       customerName: customerName,
-      dateIn: formatDate(dateIn),
       emailAddress: emailAddress,
       fmhvCategory: fmhvCategory,
       fmhvPackageCost: fmhvPackageCost,
@@ -209,15 +299,16 @@ async function processOrders(data) {
       dateCreated: formatDate(dateCreated),
       dateModified: formatDate(dateModified),
       datePulled: formatDate(datePulled),
-      Age: Age,
-      Sport: formatSport(Sport),
+      age: age,
+      sport: formatSport(sport),
       teamName: teamName,
-      Coach: Coach,
-      JerseyNumber: JerseyNumber,
+      coach: coach,
+      jerseyNumber: jerseyNumber,
       batchID: batchID,
-      automation: automation,
+      batchCategory: batchCategory,
       lorocoNumber: lorocoNumber,
       batchSequence: batchSequence,
+      paperLength: paperLength,
     };
     orders.push(finalPayload);
   } catch (err) {
@@ -239,7 +330,7 @@ async function sendResults(orderIDList) {
   } finally {
     request.post(
       {
-        url: "http://localhost:3000/loroco_test",
+        url: "http://localhost:3000/orders",
         body: orders,
         json: true,
       },
@@ -250,6 +341,7 @@ async function sendResults(orderIDList) {
       },
       console.log("Posting to Database")
     );
+    return;
   }
 }
 
