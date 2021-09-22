@@ -73,17 +73,17 @@ function findTotal(orderLength) {
 
 async function getOrderLab(order_id) {
   console.log("Starting Get Order Lab call for: ", order_id);
-  // let param_url = new URL(`https://api.fotomerchanthv.com/orders/${order_id}/lab`);
-  let param_url = new URL(
-    `https://api.staging.fotomerchanthv.com/orders/${order_id}/lab`
-  );
+  let param_url = new URL(`https://api.fotomerchanthv.com/orders/${order_id}/lab`);
+  // let param_url = new URL(
+  //   `https://api.staging.fotomerchanthv.com/orders/${order_id}/lab`
+  // );
 
   const config = {
     method: "get",
     url: param_url.href,
     headers: {
-      // Authorization: process.env.FM_API_KEY,
-      Authorization: process.env.FM_STAGE_API_KEY,
+      Authorization: process.env.FM_API_KEY,
+      // Authorization: process.env.FM_STAGE_API_KEY,
     },
   };
 
@@ -98,27 +98,16 @@ async function getOrderLab(order_id) {
   }
 }
 
-function setBatchCategory(
-  fmhvSeason,
-  shippingMethod,
-  fmhvShipCode,
-  fmhvPaymentMethod,
-  fmhvStage,
-  _fktPackage
-) { 
+ async function setBatchCategory(fmhvSeason, shippingMethod, fmhvShipCode, fmhvPaymentMethod, fmhvStage,_fktPackage) { 
   let batchCategory;
-  if (
-    (fmhvSeason !== null && fmhvSeason.includes("Sports")) ||
-    (fmhvSeason !== null && fmhvSeason.includes("Year"))
+  if ((fmhvSeason !== null && fmhvSeason.includes("Senior")) || (fmhvSeason !== null && fmhvSeason.includes("Year"))
   ) {
-    batchCategory = "Main Production";
-  } else if (
-    (shippingMethod !== null && shippingMethod.includes("Pay to Keep")) ||
-    (shippingMethod !== null &&
-      shippingMethod.includes("Plan C Processing Fee")) ||
+    return batchCategory = "Main Production";
+  } else if ((shippingMethod !== null && shippingMethod.includes("Pay to Keep")) ||
+    (shippingMethod !== null && shippingMethod.includes("Plan C Processing Fee")) ||
     (shippingMethod !== null && shippingMethod.includes("Ship to School"))
   ) {
-    batchCategory = "Main Production";
+    return batchCategory = "Main Production";
   } else if (shippingMethod === null && fmhvShipCode === null) {
     // if ordered items CONTAIN O-1, OA-1, O-1;BS*, OA-1;BS*
     if (
@@ -127,33 +116,32 @@ function setBatchCategory(
       (_fktPackage !== null && _fktPackage.includes("O-1;BS")) ||
       (_fktPackage !== null && _fktPackage.includes("OA-1;BS"))
     ) {
-      batchCategory = "Main Production ";
+      return batchCategory = "Main Production ";
       // if ordered items contains ENTIRE_PKG_* of SPEC_SHEETS*
     } else if (
       (_fktPackage !== null && _fktPackage.includes("ENTIRE_PKG_")) ||
       (_fktPackage !== null && _fktPackage.includes("SPEC_SHEETS"))
     ) {
-      batchCategory = "Main Production ";
+      return batchCategory = "Main Production ";
     }
   } else if (
     (fmhvShipCode !== null && fmhvShipCode === "KEEP_NO CHARGE") ||
     (fmhvShipCode !== null && fmhvShipCode === "PLAN_C_SHIP_HOME")
   ) {
-    batchCategory = "Main Production";
+    return batchCategory = "Main Production";
   } else if (fmhvPaymentMethod === null) {
-    batchCategory = "Main Production";
+    return batchCategory = "Main Production";
   } else if (fmhvStage !== null && fmhvStage.includes("AUTO")) {
     // if ordered items CONTAIN AB
     if (_fktPackage !== null && _fktPackage.includes("AB")) {
-      batchCategory = "Automation Retouch";
+      return batchCategory = "Automation Retouch";
       // if ordered items DOES NOT CONTAIN AB TODO-ZMF
-    } else if (_fktPackage !== null && _fktPackage.includes("")) {
-      batchCategory = "Automation";
+    } else if (_fktPackage !== null && !_fktPackage.includes("AB")) {
+      return batchCategory = "Automation";
     }
   } else {
-    batchCategory = "To Loroco";
+    return batchCategory = "To Loroco";
   }
-  return batchCategory;
 }
 
 async function processOrders(data) {
@@ -241,11 +229,7 @@ async function processOrders(data) {
     null; // sports form FAIWPO2JMM-8B2-CW31LJ
   const orderLength = objectLength(data?.order?.orderItems);
   const paperLength = findTotal(orderLength);
-
-  // These will not be from FM response, but we're filling them in regardless
-  const datePulled = Date.now();
-  const batchID = null;
-  const batchCategory = setBatchCategory(
+  const batchCategory = await setBatchCategory(
     fmhvSeason,
     shippingMethod,
     fmhvShipCode,
@@ -253,6 +237,10 @@ async function processOrders(data) {
     fmhvStage,
     _fktPackage
   );
+
+  // These will not be from FM response, but we're filling them in regardless
+  const datePulled = Date.now();
+  const batchID = null;
   const lorocoNumber = null;
   const batchSequence = null;
 
@@ -310,6 +298,7 @@ async function processOrders(data) {
       batchSequence: batchSequence,
       paperLength: paperLength,
     };
+    // console.log(finalPayload)
     orders.push(finalPayload);
   } catch (err) {
     console.log(err);
@@ -317,6 +306,8 @@ async function processOrders(data) {
     return orders;
   }
 }
+
+
 
 async function sendResults(orderIDList) {
   try {
