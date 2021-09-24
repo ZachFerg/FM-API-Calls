@@ -61,27 +61,27 @@ function objectLength(obj) {
 }
 
 
-  function findPaperLength(){
-    let packagePaperLength = 0
-    let orderPaperLength = 0
-    let paperLength = 0
-    let packageLength = objectLength(data?.order?.orderItems)
-    for(let i=0;i<packageLength;i++){
-        let orderLength = objectLength(data?.order?.orderItems[i]?.orderItems)
-        let packageQuantity = data?.order?.orderItems[i]?.quantity ?? 0;
-        let packageWidth = data?.order?.orderItems[i].product.width ?? 0;
-        packageSubtotal = packageQuantity * packageWidth
-        packagePaperLength += packageSubtotal
-        for(let y=0;y<orderLength;y++){
-            let orderQuantity = data?.order?.orderItems[i]?.orderItems[y]?.quantity ?? 0;
-            let orderWidth = data?.order?.orderItems[i]?.orderItems[y]?.product?.width ?? 0;
-            orderSubtotal = orderQuantity * orderWidth
-            orderPaperLength += orderSubtotal
-            }
-        }
-        paperLength = packagePaperLength + orderPaperLength;
-        return paperLength;
-    }
+function findPaperLength(){
+  let packagePaperLength = 0
+  let orderPaperLength = 0
+  let paperLength = 0
+  let packageLength = objectLength(data?.order?.orderItems)
+  for(let i=0;i<packageLength;i++){
+      let orderLength = objectLength(data?.order?.orderItems[i]?.orderItems)
+      let packageQuantity = data?.order?.orderItems[i]?.quantity ?? 0;
+      let packageWidth = data?.order?.orderItems[i].product.width ?? 0;
+      packageSubtotal = packageQuantity * packageWidth
+      packagePaperLength += packageSubtotal
+      for(let y=0;y<orderLength;y++){
+          let orderQuantity = data?.order?.orderItems[i]?.orderItems[y]?.quantity ?? 0;
+          let orderWidth = data?.order?.orderItems[i]?.orderItems[y]?.product?.width ?? 0;
+          orderSubtotal = orderQuantity * orderWidth
+          orderPaperLength += orderSubtotal
+          }
+      }
+      paperLength = packagePaperLength + orderPaperLength;
+      return paperLength;
+  }
 
 async function getOrderLab(order_id) {
   console.log("Starting Get Order Lab call for: ", order_id);
