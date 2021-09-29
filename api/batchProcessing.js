@@ -1,6 +1,6 @@
 require("dotenv").config({ path: "../.ENV" });
 const axios = require("axios");
-const connection = require("../config/mysql_connection");
+// const connection = require("../config/mysql_connection");
 const orders = require("../orders");
 
 /*
@@ -31,6 +31,11 @@ TO DO
 6. ** Keep going until there are no more batches
 */
 
+/**
+ *
+ * @param {string} date - date string
+ * @returns {string} date - yyyy-mm-dd syntax
+ */
 function formatDate(date) {
   var d = new Date(date),
     month = "" + (d.getMonth() + 1),
@@ -43,7 +48,10 @@ function formatDate(date) {
   return [year, month, day].join("-");
 }
 
-// Step 1
+/**
+ *
+ * @returns {array} res.data - response object from endpoint
+ */
 async function pullOrders() {
   // const today = formatDate(Date.now())
   // console.log(today)
@@ -54,7 +62,7 @@ async function pullOrders() {
       `http://localhost:5000/api/orders/getOrders/${today}`
     );
     if (res.status == 200) {
-        console.log(res.data.length + " Orders pulled for today");
+      console.log(res.data.length + " Orders pulled for today");
     }
     return res.data;
   } catch (err) {
@@ -62,16 +70,13 @@ async function pullOrders() {
   }
 }
 
-let orders = await pullOrders();
-
-// Step 2
 /**
  *
  * @param {array} orders - the results being returned from the DB
  * @param {number} threshold - the maximum sum of paperLength for a batch
- * @returns
+ * @returns {array} batchData - array of arrays containing order Ids
  */
-function setBatches(orders, threshold) {
+async function setBatches(orders, threshold) {
   let i;
   let totalBatchLength = 0;
   let batchArr = [];
@@ -89,7 +94,10 @@ function setBatches(orders, threshold) {
   return { batchArr, index: i, totalBatchLength };
 }
 
-// Step 3
+/**
+ *
+ * @returns {string} batchNum - last Batch Id returned from DB
+ */
 async function getBatchID() {
   try {
     const response = await axios.get(
@@ -117,3 +125,11 @@ function sendBatchInfo() {
 function updateFulfillmentTable() {
   //code
 }
+
+async function buildBatchLogic() {
+  let orders = await pullOrders(); // step 1
+  let batches = await setBatches(orders, 2000); // step 2 & 3
+  console.log(batches)
+}
+
+buildBatchLogic()
