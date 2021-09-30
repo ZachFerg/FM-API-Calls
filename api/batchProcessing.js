@@ -53,9 +53,8 @@ function formatDate(date) {
  * @returns {array} res.data - response object from endpoint
  */
 async function pullOrders() {
-    // const today = formatDate(Date.now())
-    // console.log(today)
-    const today = "2021-09-24";
+    const today = formatDate(Date.now())
+    console.log(today)
 
     try {
         let res = await axios.get(
@@ -71,16 +70,17 @@ async function pullOrders() {
 }
 
 /**
+/**
  * 
  * @param {array} orders - the response object from pullOrders()
  * @param {number} threshold - the limit the paperLength can't exceed
  * @returns {array} batchArr - array of objects containing batch data
  */
-function setBatches(orders, threshold) {
+async function setBatches(orders, threshold) {
     let i;
     let totalBatchLength = 0;
     let batchSequence = 1;
-    let batchID = 101003;
+    let batchID = await getBatchID();
     let newArr = []
     let batchArr = []
 
@@ -88,6 +88,7 @@ function setBatches(orders, threshold) {
         if (i < orders.length && totalBatchLength < threshold) {
             totalBatchLength += orders[i].paperLength;
             newArr.push({
+                idorders: orders[i].idorders,
                 orderID: orders[i].orderID,
                 batchID: batchID,
                 batchSequence: batchSequence,
@@ -102,6 +103,7 @@ function setBatches(orders, threshold) {
             batchSequence = 1;
             batchID += 1
             newArr.push({
+                idorders: orders[i].idorders,
                 orderID: orders[i].orderID,
                 batchID: batchID,
                 batchSequence: batchSequence,
@@ -130,25 +132,45 @@ async function getBatchID() {
     }
 }
 
-// updateOrdersTable
-async function updateOrdersTable() {
-    updatedOrders = []
-    let batchID = await getBatchID() + 1;
-    let batchSequence = 1
-    let idorders = 1
-    // http://localhost:5000/api/orders/orders/${idorder}
+/**
+ * 
+ * @param {array} batchArr - array returned from setBatches()
+ * @returns {array} updatedOrders - cleaned object for SQL injection
+ */
+async function cleanOrderObj(batchArr) {
+    let updatedOrders = []
+    for (let i = 0; i < batchArr.length; i++) {
+        try {
+            const orderPayload = {
+                idorders: batchArr[i].idorders,
+                batchID: batchArr[i].batchID,
+                batchSequence: batchArr[i].batchSequence
+            };
+            updatedOrders.push(orderPayload);
+        } catch (err) {
+            console.log(err)
+        }
+    }
+    return updatedOrders
+}
 
+async function updateOrdersTable(Arr) {
+    const param_url = new URL(
+        `http://localhost:5000/api/orders/orders/`
+    );
+
+    const config = {
+        method: "put",
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
     try {
-        const finalPayload = {
-            batchID: batchID,
-            batchSequence: batchSequence,
-            idorders: idorders
-        };
-        updatedOrders.push(finalPayload);
+        for (let i = 0; i < Arr.length; i++) {
+            repo = await axios.put(`${param_url.href}${Arr[i].idorders}`, Arr[i], config);
+        }
     } catch (err) {
-        console.log(err);
-    } finally {
-        return updatedOrders;
+        console.error(err);
     }
 }
 
@@ -166,7 +188,8 @@ function updateFulfillmentTable() {
 async function buildBatchLogic() {
     let orders = await pullOrders(); // step 1
     let batches = await setBatches(orders, 2000); // step 2 & 3
-    console.log(batches)
+    let cleanedData = await cleanOrderObj(batches)
+    // updateOrdersTable(cleanedData)
 }
 
-buildBatchLogic()
+// buildBatchLogic()
