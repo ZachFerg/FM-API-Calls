@@ -60,7 +60,10 @@ function objectLength(obj) {
   return result;
 }
 
-
+/**
+ * 
+ * @returns {number} paperLength - width of all items in an order
+ */
 function findPaperLength(){
   let packagePaperLength = 0
   let orderPaperLength = 0

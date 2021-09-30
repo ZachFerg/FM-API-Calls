@@ -96,7 +96,7 @@ async function setBatches(orders, threshold) {
 
 /**
  *
- * @returns {string} batchNum - last Batch Id returned from DB
+ * @returns {Number} batchNum - last Batch Id returned from DB
  */
 async function getBatchID() {
   try {
@@ -104,16 +104,33 @@ async function getBatchID() {
       "http://localhost:5000/api/batches/batches/getBatchID"
     );
     let batchNum = response.data[0].batchNumber;
-    return batchNum;
+    return parseInt(batchNum);
   } catch (error) {
     console.error(error);
   }
 }
 
 // updateOrdersTable
-function updateOrdersTable() {
-  //code
-}
+async function updateOrdersTable() {
+    updatedOrders = []
+    let batchID = await getBatchID() + 1;
+    let batchSequence = 1
+    let idorders = 1
+    // http://localhost:5000/api/orders/orders/${idorder}
+  
+    try {
+      const finalPayload = {
+        batchID: batchID,
+        batchSequence: batchSequence,
+        idorders: idorders
+      };
+      updatedOrders.push(finalPayload);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      return updatedOrders;
+    }
+  }
 
 // Step 4
 function sendBatchInfo() {
