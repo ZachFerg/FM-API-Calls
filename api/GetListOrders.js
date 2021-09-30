@@ -1,16 +1,16 @@
-require("dotenv").config({ path: "../.ENV" });
-const axios = require("axios");
+require('dotenv').config({ path: '../.ENV' });
+const axios = require('axios');
 
 function formatDate(date) {
   var d = new Date(date),
-    month = "" + (d.getMonth() + 1),
-    day = "" + d.getDate(),
+    month = '' + (d.getMonth() + 1),
+    day = '' + d.getDate(),
     year = d.getFullYear();
 
-  if (month.length < 2) month = "0" + month;
-  if (day.length < 2) day = "0" + day;
+  if (month.length < 2) month = '0' + month;
+  if (day.length < 2) day = '0' + day;
 
-  return [year, month, day].join("-");
+  return [year, month, day].join('-');
 }
 
 const today = new Date();
@@ -33,13 +33,11 @@ const fm_day_before = formatDate(day_before);
 // );
 
 const param_url = new URL(
-  `https://api.staging.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&`
+  `https://api.staging.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&`,
 );
 
-
-
 const config = {
-  method: "get",
+  method: 'get',
   headers: {
     // Authorization: process.env.FM_API_KEY,
     Authorization: process.env.FM_STAGE_API_KEY,
@@ -49,7 +47,7 @@ const config = {
 console.log(param_url.href);
 
 async function getAllOrderIds() {
-  console.log("Starting Get List Orders call.....");
+  console.log('Starting Get List Orders call.....');
 
   let repo = null;
   page_count = 1;
@@ -57,7 +55,10 @@ async function getAllOrderIds() {
 
   try {
     do {
-      repo = await axios.get(`${param_url.href}&page=${page_count++}`, config);
+      repo = await axios.get(
+        `${param_url.href}&page=${page_count++}`,
+        config,
+      );
       console.log(repo.data.paging);
       results = results.concat(repo.data.orders);
       // } while (repo.data.paging.page < repo.data.paging.last);
