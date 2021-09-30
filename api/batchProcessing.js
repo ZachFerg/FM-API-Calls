@@ -1,7 +1,7 @@
-require("dotenv").config({ path: "../.ENV" });
+require("dotenv").config({
+    path: "../.ENV"
+});
 const axios = require("axios");
-// const connection = require("../config/mysql_connection");
-const orders = require("../orders");
 
 /*
 TO DO
@@ -37,15 +37,15 @@ TO DO
  * @returns {string} date - yyyy-mm-dd syntax
  */
 function formatDate(date) {
-  var d = new Date(date),
-    month = "" + (d.getMonth() + 1),
-    day = "" + d.getDate(),
-    year = d.getFullYear();
+    var d = new Date(date),
+        month = "" + (d.getMonth() + 1),
+        day = "" + d.getDate(),
+        year = d.getFullYear();
 
-  if (month.length < 2) month = "0" + month;
-  if (day.length < 2) day = "0" + day;
+    if (month.length < 2) month = "0" + month;
+    if (day.length < 2) day = "0" + day;
 
-  return [year, month, day].join("-");
+    return [year, month, day].join("-");
 }
 
 /**
@@ -53,45 +53,65 @@ function formatDate(date) {
  * @returns {array} res.data - response object from endpoint
  */
 async function pullOrders() {
-  // const today = formatDate(Date.now())
-  // console.log(today)
-  const today = "2021-09-24";
+    // const today = formatDate(Date.now())
+    // console.log(today)
+    const today = "2021-09-24";
 
-  try {
-    let res = await axios.get(
-      `http://localhost:5000/api/orders/getOrders/${today}`
-    );
-    if (res.status == 200) {
-      console.log(res.data.length + " Orders pulled for today");
+    try {
+        let res = await axios.get(
+            `http://localhost:5000/api/orders/getOrders/${today}`
+        );
+        if (res.status == 200) {
+            console.log(res.data.length + " Orders pulled for today");
+        }
+        return res.data;
+    } catch (err) {
+        console.error(err);
     }
-    return res.data;
-  } catch (err) {
-    console.error(err);
-  }
 }
 
 /**
- *
- * @param {array} orders - the results being returned from the DB
- * @param {number} threshold - the maximum sum of paperLength for a batch
- * @returns {array} batchData - array of arrays containing order Ids
+ * 
+ * @param {array} orders - the response object from pullOrders()
+ * @param {number} threshold - the limit the paperLength can't exceed
+ * @returns {array} batchArr - array of objects containing batch data
  */
-async function setBatches(orders, threshold) {
-  let i;
-  let totalBatchLength = 0;
-  let batchArr = [];
-  let batchID = await getBatchID();
+function setBatches(orders, threshold) {
+    let i;
+    let totalBatchLength = 0;
+    let batchSequence = 1;
+    let batchID = 101003;
+    let newArr = []
+    let batchArr = []
 
-  // loop through array and add paperLength until it exceeds threshold
-  for (i = 0; i < orders.length && totalBatchLength < threshold; i++) {
-    totalBatchLength += orders[i].paperLength;
-    // push order id into array for API call
-    batchArr.push(orders[i].orderID);
-  }
-  // return an object containing an array of orderID's for a batch,
-  // the index it reached looping through the orders array,
-  // and the sum of all the paperLength in that batch
-  return { batchArr, index: i, totalBatchLength };
+    for (i = 0; i < orders.length; i++) {
+        if (i < orders.length && totalBatchLength < threshold) {
+            totalBatchLength += orders[i].paperLength;
+            newArr.push({
+                orderID: orders[i].orderID,
+                batchID: batchID,
+                batchSequence: batchSequence,
+                totalBatchLength: totalBatchLength
+            })
+            batchSequence += 1;
+        } else {
+            totalBatchLength = 0;
+            totalBatchLength += orders[i].paperLength;
+            batchArr.push(...newArr)
+            newArr.length = 0
+            batchSequence = 1;
+            batchID += 1
+            newArr.push({
+                orderID: orders[i].orderID,
+                batchID: batchID,
+                batchSequence: batchSequence,
+                totalBatchLength: totalBatchLength
+            })
+            batchSequence += 1;
+        }
+    }
+    batchArr.push(...newArr)
+    return batchArr
 }
 
 /**
@@ -99,15 +119,15 @@ async function setBatches(orders, threshold) {
  * @returns {Number} batchNum - last Batch Id returned from DB
  */
 async function getBatchID() {
-  try {
-    const response = await axios.get(
-      "http://localhost:5000/api/batches/batches/getBatchID"
-    );
-    let batchNum = response.data[0].batchNumber;
-    return parseInt(batchNum);
-  } catch (error) {
-    console.error(error);
-  }
+    try {
+        const response = await axios.get(
+            "http://localhost:5000/api/batches/batches/getBatchID"
+        );
+        let batchNum = response.data[0].batchNumber;
+        return parseInt(batchNum);
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 // updateOrdersTable
@@ -117,36 +137,36 @@ async function updateOrdersTable() {
     let batchSequence = 1
     let idorders = 1
     // http://localhost:5000/api/orders/orders/${idorder}
-  
+
     try {
-      const finalPayload = {
-        batchID: batchID,
-        batchSequence: batchSequence,
-        idorders: idorders
-      };
-      updatedOrders.push(finalPayload);
+        const finalPayload = {
+            batchID: batchID,
+            batchSequence: batchSequence,
+            idorders: idorders
+        };
+        updatedOrders.push(finalPayload);
     } catch (err) {
-      console.log(err);
+        console.log(err);
     } finally {
-      return updatedOrders;
+        return updatedOrders;
     }
-  }
+}
 
 // Step 4
 function sendBatchInfo() {
-  // Send response to FM api call
-  // parse through response, grab certain info
+    // Send response to FM api call
+    // parse through response, grab certain info
 }
 
 // Step 5
 function updateFulfillmentTable() {
-  //code
+    //code
 }
 
 async function buildBatchLogic() {
-  let orders = await pullOrders(); // step 1
-  let batches = await setBatches(orders, 2000); // step 2 & 3
-  console.log(batches)
+    let orders = await pullOrders(); // step 1
+    let batches = await setBatches(orders, 2000); // step 2 & 3
+    console.log(batches)
 }
 
 buildBatchLogic()
