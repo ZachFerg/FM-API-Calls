@@ -40,8 +40,7 @@ async function pullOrders() {
 }
 
 /**
-/**
- * 
+ *
  * @param {array} orders - the response object from pullOrders()
  * @param {number} threshold - the limit the paperLength can't exceed
  * @returns {array} batchArr - array of objects containing batch data
@@ -154,6 +153,24 @@ function sendBatchInfo() {
   // parse through response, grab certain info
 }
 
+async function cleanBatchObj(batchArr) {
+  let updatedOrders = [];
+  console.log(batchArr.length);
+  for (let i = 0; i < batchArr.length; i++) {
+    try {
+      const orderPayload = {
+        idorders: batchArr[i].idorders,
+        batchID: batchArr[i].batchID,
+        batchSequence: batchArr[i].batchSequence,
+      };
+      updatedOrders.push(orderPayload);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  return updatedOrders;
+}
+
 // Step 5
 function updateBatchTable() {
   /*
@@ -185,6 +202,7 @@ async function buildBatchLogic() {
   let batches = await setBatches(orders, 2000); // step 2 & 3
   let cleanedData = await cleanOrderObj(batches);
   // updateOrdersTable(cleanedData)
+  let batchData = await cleanBatchObj(batches);
 }
 
-// buildBatchLogic()
+// buildBatchLogic();
