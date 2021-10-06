@@ -370,7 +370,6 @@ async function processOrders(data) {
       batchSequence: batchSequence,
       paperLength: paperLength,
     };
-    // console.log(finalPayload)
     orders.push(finalPayload);
   } catch (err) {
     console.log(err);
