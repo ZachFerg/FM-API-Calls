@@ -2,18 +2,12 @@
 const express = require("express");
 require("dotenv").config();
 const connection = require("./config/mysql_connection");
-// const controller = require("./controllers/mysql_strawbridge");
-// const apiRoutes = require('./routes/mysql_strawbridge');
 
 const app = express();
 const hostname = "127.0.0.1";
 const port = 3000;
 
-
-// app.use(express.json());
 app.use(express.json({ limit: "50mb" }));
-
-// app.use('/', apiRoutes)
 
 // main page
 app.get("/", (req, res) => {

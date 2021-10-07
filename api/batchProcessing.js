@@ -18,14 +18,24 @@ function formatDate(date) {
   return [year, month, day].join('-');
 }
 
+function objectLength(obj) {
+  let result = 0;
+  for (let prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      result++;
+    }
+  }
+  return result;
+}
+
 /**
  *
  * @returns {array} res.data - response object from endpoint
  */
 async function pullOrders() {
-  //   const today = formatDate(Date.now());
-  const today = '2021-09-24';
-  console.log(today);
+  const today = formatDate(Date.now());
+  //   const today = '2021-09-24';
+  //   console.log(today);
 
   try {
     let res = await axios.get(
@@ -151,7 +161,16 @@ async function updateOrdersTable(Arr) {
   }
 }
 
-// Step 4
+async function sendBatchInfo(arr) {
+  let results = [];
+  for (const batchID in arr) {
+    // console.log(batchID);
+    const fmResult = await makeAPIBatchCall(arr[batchID]);
+    results = results.concat(fmResult);
+  }
+  return results;
+}
+
 async function makeAPIBatchCall(arr) {
   let idArray = arr.map(({ orderID }) => orderID); // grabs all order ID's from current array
 
@@ -177,7 +196,6 @@ async function makeAPIBatchCall(arr) {
       },
     },
   };
-  //   console.log(fmPayload);
 
   let param_url = new URL(
     `https://api.staging.fotomerchanthv.com/batch_jobs`,
@@ -188,31 +206,19 @@ async function makeAPIBatchCall(arr) {
     url: param_url.href,
     data: fmPayload,
     headers: {
-      // Authorization: process.env.FM_API_KEY,
       Authorization: process.env.FM_STAGE_API_KEY,
     },
   };
 
-  // try {
-  //   let res = await axios(config);
-  //   if (res.status == 200) {
-  //     console.log('Batch Call successful...');
-  //   }
-  //   return res.data;
-  // } catch (err) {
-  //   console.error(err);
-  // }
-}
-
-async function sendBatchInfo(arr) {
-  let results = [];
-  for (const batchID in arr) {
-    console.log(batchID);
-    const fmResult = await makeAPIBatchCall(arr[batchID]);
-    results = results.concat(fmResult);
-    // console.log(results)
+  try {
+    let res = await axios(config);
+    if (res.status == 200) {
+      console.log('Batch Call successful...');
+    }
+    return res.data;
+  } catch (err) {
+    console.error(err);
   }
-  return results;
 }
 
 /**
@@ -223,7 +229,6 @@ async function sendBatchInfo(arr) {
  */
 async function groupBy(arr, property) {
   return arr.reduce(function (memo, x) {
-    //   console.log(memo)
     if (!memo[x[property]]) {
       memo[x[property]] = [];
     }
@@ -232,34 +237,57 @@ async function groupBy(arr, property) {
   }, {});
 }
 
-// Step 5
-async function updateBatchTable() {
+async function updateBatchTable(results, fmBatchInfo) {
+  const batchInfo = [];
+  const fmBatchRef = [];
+  const batchLengthInfo = [];
+
+  let fmObjcount = objectLength(fmBatchInfo);
+
   const paperSurface = 'Glossy';
   const paperWidth = 10;
-  const batchLength = 0; // what is batchLength?
   const envelopeType = 'UC';
   const shipMethod = 'S2H';
-  const batchID = '101007';
-  const fmBatchId = 'B21-105-8ME9XS';
   const retouch = 1;
   const retouchQC = 1;
 
-  const batchPayload = {
-    batchNumber: batchID,
-    fmBatchId: fmBatchId,
-    paperSurface: paperSurface,
-    paperWidth: paperWidth,
-    batchLength: batchLength,
-    envelopeType: envelopeType,
-    shipMethod: shipMethod,
-    recQC: 1,
-    preRipQC: 1,
-    postRipQC: 1,
-    retouch: retouch,
-    retouchQC: retouchQC,
-  };
+  for (let i = 0; i < fmObjcount; i++) {
+    let fmBatchId = fmBatchInfo[i].batchJobs[0].batchReference;
+    fmBatchRef.push(fmBatchId);
+  }
 
-  console.log(batchPayload);
+  const resultKeys = Object.keys(results);
+
+  for (let y = 0; y < resultKeys.length; y++) {
+    totalBatchLength =
+      results[resultKeys[y]][
+        Object.keys(results[resultKeys[y]]).length - 1
+      ].totalBatchLength;
+    batchLengthInfo.push(totalBatchLength);
+  }
+
+  let zip = (rows) =>
+    rows[0].map((_, c) => rows.map((row) => row[c]));
+
+  let zipped = zip([resultKeys, fmBatchRef, batchLengthInfo]);
+
+  for (let b = 0; b < zipped.length; b++) {
+    const batchPayload = {
+      batchNumber: zipped[b][0],
+      fmBatchId: zipped[b][1],
+      paperSurface: paperSurface,
+      paperWidth: paperWidth,
+      batchLength: zipped[b][2],
+      envelopeType: envelopeType,
+      shipMethod: shipMethod,
+      recQC: 1,
+      preRipQC: 1,
+      postRipQC: 1,
+      retouch: retouch,
+      retouchQC: retouchQC,
+    };
+    batchInfo.push(batchPayload);
+  }
 
   const param_url = new URL(
     `http://localhost:5000/api/batches/batches/`,
@@ -268,15 +296,15 @@ async function updateBatchTable() {
   const config = {
     method: 'post',
     url: param_url.href,
-    data: batchPayload,
+    body: batchInfo,
     headers: {
       'Content-Type': 'application/json',
     },
   };
   try {
-    //   for (let i = 0; i < Arr.length; i++) {
-    repo = await axios(config);
-    //   }
+    for (let i = 0; i < batchInfo.length; i++) {
+      repo = await axios.post(param_url.href, batchInfo[i], config);
+    }
   } catch (err) {
     console.error(err);
   }
@@ -286,11 +314,12 @@ async function buildBatchLogic() {
   let orders = await pullOrders(); // step 1
   let batches = await setBatches(orders, 800); // step 2 & 3
   let cleanedData = await cleanOrderObj(batches);
-  // updateOrdersTable(cleanedData)
+  updateOrdersTable(cleanedData);
   let batchingGroup = await groupBy(batches, 'batchID');
-  //   console.log(batchingGroup)
+  // console.log(batchingGroup)
   let batchInfo = await sendBatchInfo(batchingGroup);
-  // console.log(batchInfo)
+  //   console.log(batchInfo)
+  updateBatchTable(batchingGroup, batchInfo);
 }
 
 buildBatchLogic();
