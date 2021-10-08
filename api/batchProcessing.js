@@ -11,7 +11,6 @@ function formatDate(date) {
     month = '' + (d.getMonth() + 1),
     day = '' + d.getDate(),
     year = d.getFullYear();
-
   if (month.length < 2) month = '0' + month;
   if (day.length < 2) day = '0' + day;
 
@@ -164,7 +163,6 @@ async function updateOrdersTable(Arr) {
 async function sendBatchInfo(arr) {
   let results = [];
   for (const batchID in arr) {
-    // console.log(batchID);
     const fmResult = await makeAPIBatchCall(arr[batchID]);
     results = results.concat(fmResult);
   }
@@ -172,7 +170,8 @@ async function sendBatchInfo(arr) {
 }
 
 async function makeAPIBatchCall(arr) {
-  let idArray = arr.map(({ orderID }) => orderID); // grabs all order ID's from current array
+  // grabs all order ID's from current array
+  let idArray = arr.map(({ orderID }) => orderID);
 
   let fmPayload = {
     batchJob: {
@@ -311,14 +310,12 @@ async function updateBatchTable(results, fmBatchInfo) {
 }
 
 async function buildBatchLogic() {
-  let orders = await pullOrders(); // step 1
-  let batches = await setBatches(orders, 800); // step 2 & 3
+  let orders = await pullOrders();
+  let batches = await setBatches(orders, 800); // <- Set threshold here
   let cleanedData = await cleanOrderObj(batches);
   updateOrdersTable(cleanedData);
   let batchingGroup = await groupBy(batches, 'batchID');
-  // console.log(batchingGroup)
   let batchInfo = await sendBatchInfo(batchingGroup);
-  //   console.log(batchInfo)
   updateBatchTable(batchingGroup, batchInfo);
 }
 

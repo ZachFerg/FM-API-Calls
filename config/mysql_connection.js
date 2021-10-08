@@ -1,6 +1,6 @@
 // Dependencies
-require('dotenv').config({path: '../.ENV'})
-const mysql = require("mysql");
+require('dotenv').config({ path: '../.ENV' });
+const mysql = require('mysql');
 
 // Set database connection credentials
 const db_config = {
@@ -14,8 +14,13 @@ const db_config = {
 // Create a MySQL pool
 const connection = mysql.createPool(db_config);
 
-console.log("connecting to " + db_config.host)
-console.log("user " + db_config.user + " is signing in to " + db_config.database)
+console.log('connecting to ' + db_config.host);
+console.log(
+  'user ' +
+    db_config.user +
+    ' is signing in to ' +
+    db_config.database,
+);
 
 // Export the pool
 module.exports = connection;
