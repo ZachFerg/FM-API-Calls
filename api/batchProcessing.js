@@ -32,8 +32,9 @@ function objectLength(obj) {
  * @returns {array} res.data - response object from endpoint
  */
 async function pullOrders() {
-  const today = formatDate(Date.now());
+  // const today = formatDate(Date.now());
   //   const today = '2021-09-24';
+  const today = '2021-10-07';
   //   console.log(today);
 
   try {
@@ -311,7 +312,7 @@ async function updateBatchTable(results, fmBatchInfo) {
 
 async function buildBatchLogic() {
   let orders = await pullOrders();
-  let batches = await setBatches(orders, 800); // <- Set threshold here
+  let batches = await setBatches(orders, 100); // <- Set threshold here
   let cleanedData = await cleanOrderObj(batches);
   updateOrdersTable(cleanedData);
   let batchingGroup = await groupBy(batches, 'batchID');

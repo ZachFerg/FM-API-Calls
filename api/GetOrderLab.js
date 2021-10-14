@@ -168,7 +168,7 @@ function setBatchCategory() {
   const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
   let batch = '';
 
-  if (fmhvSeason.includes('Senior') || fmhvSeason.includes('Year')) {
+  if (fmhvSeason !== null && fmhvSeason.includes('Senior') || fmhvSeason !== null && fmhvSeason.includes('Year')) {
     batch = 'Main Production';
   } else if (
     (shippingMethod !== null &&
