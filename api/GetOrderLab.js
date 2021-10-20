@@ -99,17 +99,19 @@ function findPaperLength() {
 
 async function getOrderLab(order_id) {
   console.log('Starting Get Order Lab call for: ', order_id);
-  // let param_url = new URL(`https://api.fotomerchanthv.com/orders/${order_id}/lab`);
   let param_url = new URL(
-    `https://api.staging.fotomerchanthv.com/orders/${order_id}/lab`,
+    `https://api.fotomerchanthv.com/orders/${order_id}/lab`,
   );
+  // let param_url = new URL(
+  //   `https://api.staging.fotomerchanthv.com/orders/${order_id}/lab`,
+  // );
 
   const config = {
     method: 'get',
     url: param_url.href,
     headers: {
-      // Authorization: process.env.FM_API_KEY,
-      Authorization: process.env.FM_STAGE_API_KEY,
+      Authorization: process.env.FM_API_KEY,
+      // Authorization: process.env.FM_STAGE_API_KEY,
     },
   };
 
@@ -124,52 +126,21 @@ async function getOrderLab(order_id) {
   }
 }
 
-// async function setBatchCategory() {
-//   const fmhvSeason = data?.order?.clientSession?.season?.label ?? null;
-//   const fmhvShipCode = data?.order?.shippingMethod?.code ?? null;
-//   const shippingMethod = data?.order?.shippingMethod?.label ?? null;
-//   const fmhvPaymentMethod = data?.order?.paymentMethod ?? null;
-//   const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
-//   const _fktPackage = null;
-//   let batch = "";
-
-//   if ((fmhvSeason !== null && fmhvSeason.includes("Senior")) || (fmhvSeason !== null && fmhvSeason.includes("Year"))) {
-//       return batch = "Main Production";
-//   } else if (shippingMethod !== null && shippingMethod.includes("Pay to Keep") || (shippingMethod !== null && shippingMethod.includes("Plan C Processing Fee")) || (shippingMethod !== null && shippingMethod.includes("Ship to School"))) {
-//       return batch = "Main Production";
-//   } else if (shippingMethod === null && fmhvShipCode === null) {
-//       if (_fktPackage !== null && _fktPackage.includes("O-1") || (_fktPackage !== null && _fktPackage.includes("OA-1")) || (_fktPackage !== null && _fktPackage.includes("O-1;BS")) || (_fktPackage !== null && _fktPackage.includes("OA-1;BS"))) {
-//           return batch = "Main Production"
-//       } else if (_fktPackage !== null && _fktPackage.includes("ENTIRE_PKG_") || (_fktPackage !== null && _fktPackage.includes("SPEC_SHEETS"))) {
-//           return batch = "Main Production"
-//       }
-//   } else if ((fmhvShipCode !== null && fmhvShipCode === "KEEP_NO CHARGE") || (fmhvShipCode !== null && fmhvShipCode === "PLAN_C_SHIP_HOME")) {
-//       return batch = "Main Production"
-//   } else if (fmhvPaymentMethod === null) {
-//       return batch = "Main Production"
-//   } else if (fmhvStage !== null && fmhvStage.includes("AUTO")) {
-//       if (_fktPackage !== null && _fktPackage.includes("AB")) {
-//           return batch = "Automation Retouch"
-//       } else if (_fktPackage !== null && !_fktPackage.includes("AB")) {
-//           return batch = "Automation"
-//       }
-//   } else {
-//       return batch = "To Loroco";
-//   }
-//   return batch
-// }
-
-function setBatchCategory() {
+async function setBatchCategory() {
   const fmhvSeason =
     data?.order?.clientSession?.season?.label ?? null;
   const fmhvShipCode = data?.order?.shippingMethod?.code ?? null;
   const shippingMethod = data?.order?.shippingMethod?.label ?? null;
   const fmhvPaymentMethod = data?.order?.paymentMethod ?? null;
   const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
+  const _fktPackage = null;
   let batch = '';
 
-  if (fmhvSeason !== null && fmhvSeason.includes('Senior') || fmhvSeason !== null && fmhvSeason.includes('Year')) {
-    batch = 'Main Production';
+  if (
+    (fmhvSeason !== null && fmhvSeason.includes('Senior')) ||
+    (fmhvSeason !== null && fmhvSeason.includes('Year'))
+  ) {
+    return (batch = 'Main Production');
   } else if (
     (shippingMethod !== null &&
       shippingMethod.includes('Pay to Keep')) ||
@@ -178,21 +149,77 @@ function setBatchCategory() {
     (shippingMethod !== null &&
       shippingMethod.includes('Ship to School'))
   ) {
-    batch = 'Main Production';
+    return (batch = 'Main Production');
   } else if (shippingMethod === null && fmhvShipCode === null) {
-    batch = 'Main Production';
+    if (
+      (_fktPackage !== null && _fktPackage.includes('O-1')) ||
+      (_fktPackage !== null && _fktPackage.includes('OA-1')) ||
+      (_fktPackage !== null && _fktPackage.includes('O-1;BS')) ||
+      (_fktPackage !== null && _fktPackage.includes('OA-1;BS'))
+    ) {
+      return (batch = 'Main Production');
+    } else if (
+      (_fktPackage !== null && _fktPackage.includes('ENTIRE_PKG_')) ||
+      (_fktPackage !== null && _fktPackage.includes('SPEC_SHEETS'))
+    ) {
+      return (batch = 'Main Production');
+    }
   } else if (
     (fmhvShipCode !== null && fmhvShipCode === 'KEEP_NO CHARGE') ||
     (fmhvShipCode !== null && fmhvShipCode === 'PLAN_C_SHIP_HOME')
   ) {
-    batch = 'Main Production';
+    return (batch = 'Main Production');
   } else if (fmhvPaymentMethod === null) {
-    batch = 'Main Production';
+    return (batch = 'Main Production');
+  } else if (fmhvStage !== null && fmhvStage.includes('AUTO')) {
+    if (_fktPackage !== null && _fktPackage.includes('AB')) {
+      return (batch = 'Automation Retouch');
+    } else if (_fktPackage !== null && !_fktPackage.includes('AB')) {
+      return (batch = 'Automation');
+    }
   } else {
-    batch = 'To Loroco';
+    return (batch = 'To Loroco');
   }
   return batch;
 }
+
+// function setBatchCategory() {
+//   const fmhvSeason =
+//     data?.order?.clientSession?.season?.label ?? null;
+//   const fmhvShipCode = data?.order?.shippingMethod?.code ?? null;
+//   const shippingMethod = data?.order?.shippingMethod?.label ?? null;
+//   const fmhvPaymentMethod = data?.order?.paymentMethod ?? null;
+//   const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
+//   let batch = '';
+
+//   if (
+//     (fmhvSeason !== null && fmhvSeason.includes('Senior')) ||
+//     (fmhvSeason !== null && fmhvSeason.includes('Year'))
+//   ) {
+//     batch = 'Main Production';
+//   } else if (
+//     (shippingMethod !== null &&
+//       shippingMethod.includes('Pay to Keep')) ||
+//     (shippingMethod !== null &&
+//       shippingMethod.includes('Plan C Processing Fee')) ||
+//     (shippingMethod !== null &&
+//       shippingMethod.includes('Ship to School'))
+//   ) {
+//     batch = 'Main Production';
+//   } else if (shippingMethod === null && fmhvShipCode === null) {
+//     batch = 'Main Production';
+//   } else if (
+//     (fmhvShipCode !== null && fmhvShipCode === 'KEEP_NO CHARGE') ||
+//     (fmhvShipCode !== null && fmhvShipCode === 'PLAN_C_SHIP_HOME')
+//   ) {
+//     batch = 'Main Production';
+//   } else if (fmhvPaymentMethod === null) {
+//     batch = 'Main Production';
+//   } else {
+//     batch = 'To Loroco';
+//   }
+//   return batch;
+// }
 
 async function processOrders(data) {
   const orderID = data?.order?.id ?? null;
@@ -200,7 +227,7 @@ async function processOrders(data) {
     data?.order?.clientSession?.externalReference ?? null;
   const _fktCustomerNo =
     data?.order?.clientSession?.client?.externalReference ?? null;
-  const _fktPackage = null; // FM needs to just give us the syntax for this, not building a function that will inevitably have to be rewritten
+  const _fktPackage = data?.order?.orderPackageString ?? null;
   const clientName =
     data?.order?.clientSession?.client?.label ??
     data?.order?.orderFormEntrys[0]?.values[
