@@ -320,4 +320,4 @@ async function buildBatchLogic() {
   updateBatchTable(batchingGroup, batchInfo);
 }
 
-buildBatchLogic();
+// buildBatchLogic();

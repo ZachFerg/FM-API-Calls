@@ -70,7 +70,7 @@ function objectLength(obj) {
  *
  * @returns {number} paperLength - width of all items in an order
  */
-function findPaperLength() {
+async function findPaperLength() {
   let packagePaperLength = 0;
   let orderPaperLength = 0;
   let paperLength = 0;
@@ -99,19 +99,19 @@ function findPaperLength() {
 
 async function getOrderLab(order_id) {
   console.log('Starting Get Order Lab call for: ', order_id);
-  let param_url = new URL(
-    `https://api.fotomerchanthv.com/orders/${order_id}/lab`,
-  );
   // let param_url = new URL(
-  //   `https://api.staging.fotomerchanthv.com/orders/${order_id}/lab`,
+  //   `https://api.fotomerchanthv.com/orders/${order_id}/lab`,
   // );
+  let param_url = new URL(
+    `https://api.staging.fotomerchanthv.com/orders/${order_id}/lab`,
+  );
 
   const config = {
     method: 'get',
     url: param_url.href,
     headers: {
-      Authorization: process.env.FM_API_KEY,
-      // Authorization: process.env.FM_STAGE_API_KEY,
+      // Authorization: process.env.FM_API_KEY,
+      Authorization: process.env.FM_STAGE_API_KEY,
     },
   };
 
@@ -126,77 +126,21 @@ async function getOrderLab(order_id) {
   }
 }
 
-async function setBatchCategory() {
-  const fmhvSeason =
-    data?.order?.clientSession?.season?.label ?? null;
-  const fmhvShipCode = data?.order?.shippingMethod?.code ?? null;
-  const shippingMethod = data?.order?.shippingMethod?.label ?? null;
-  const fmhvPaymentMethod = data?.order?.paymentMethod ?? null;
-  const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
-  const _fktPackage = null;
-  let batch = '';
-
-  if (
-    (fmhvSeason !== null && fmhvSeason.includes('Senior')) ||
-    (fmhvSeason !== null && fmhvSeason.includes('Year'))
-  ) {
-    return (batch = 'Main Production');
-  } else if (
-    (shippingMethod !== null &&
-      shippingMethod.includes('Pay to Keep')) ||
-    (shippingMethod !== null &&
-      shippingMethod.includes('Plan C Processing Fee')) ||
-    (shippingMethod !== null &&
-      shippingMethod.includes('Ship to School'))
-  ) {
-    return (batch = 'Main Production');
-  } else if (shippingMethod === null && fmhvShipCode === null) {
-    if (
-      (_fktPackage !== null && _fktPackage.includes('O-1')) ||
-      (_fktPackage !== null && _fktPackage.includes('OA-1')) ||
-      (_fktPackage !== null && _fktPackage.includes('O-1;BS')) ||
-      (_fktPackage !== null && _fktPackage.includes('OA-1;BS'))
-    ) {
-      return (batch = 'Main Production');
-    } else if (
-      (_fktPackage !== null && _fktPackage.includes('ENTIRE_PKG_')) ||
-      (_fktPackage !== null && _fktPackage.includes('SPEC_SHEETS'))
-    ) {
-      return (batch = 'Main Production');
-    }
-  } else if (
-    (fmhvShipCode !== null && fmhvShipCode === 'KEEP_NO CHARGE') ||
-    (fmhvShipCode !== null && fmhvShipCode === 'PLAN_C_SHIP_HOME')
-  ) {
-    return (batch = 'Main Production');
-  } else if (fmhvPaymentMethod === null) {
-    return (batch = 'Main Production');
-  } else if (fmhvStage !== null && fmhvStage.includes('AUTO')) {
-    if (_fktPackage !== null && _fktPackage.includes('AB')) {
-      return (batch = 'Automation Retouch');
-    } else if (_fktPackage !== null && !_fktPackage.includes('AB')) {
-      return (batch = 'Automation');
-    }
-  } else {
-    return (batch = 'To Loroco');
-  }
-  return batch;
-}
-
-// function setBatchCategory() {
+// async function setBatchCategory() {
 //   const fmhvSeason =
 //     data?.order?.clientSession?.season?.label ?? null;
 //   const fmhvShipCode = data?.order?.shippingMethod?.code ?? null;
 //   const shippingMethod = data?.order?.shippingMethod?.label ?? null;
 //   const fmhvPaymentMethod = data?.order?.paymentMethod ?? null;
 //   const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
+//   const _fktPackage = data?.order?.orderPackageString ?? null;
 //   let batch = '';
 
 //   if (
 //     (fmhvSeason !== null && fmhvSeason.includes('Senior')) ||
 //     (fmhvSeason !== null && fmhvSeason.includes('Year'))
 //   ) {
-//     batch = 'Main Production';
+//     return (batch = 'Main Production');
 //   } else if (
 //     (shippingMethod !== null &&
 //       shippingMethod.includes('Pay to Keep')) ||
@@ -205,21 +149,151 @@ async function setBatchCategory() {
 //     (shippingMethod !== null &&
 //       shippingMethod.includes('Ship to School'))
 //   ) {
-//     batch = 'Main Production';
+//     return (batch = 'Main Production');
 //   } else if (shippingMethod === null && fmhvShipCode === null) {
-//     batch = 'Main Production';
+//     if (
+//       (_fktPackage !== null && _fktPackage.includes('O-1')) ||
+//       (_fktPackage !== null && _fktPackage.includes('OA-1')) ||
+//       (_fktPackage !== null && _fktPackage.includes('O-1;BS')) ||
+//       (_fktPackage !== null && _fktPackage.includes('OA-1;BS'))
+//     ) {
+//       return (batch = 'Main Production');
+//     } else if (
+//       (_fktPackage !== null && _fktPackage.includes('ENTIRE_PKG_')) ||
+//       (_fktPackage !== null && _fktPackage.includes('SPEC_SHEETS'))
+//     ) {
+//       return (batch = 'Main Production');
+//     }
 //   } else if (
 //     (fmhvShipCode !== null && fmhvShipCode === 'KEEP_NO CHARGE') ||
 //     (fmhvShipCode !== null && fmhvShipCode === 'PLAN_C_SHIP_HOME')
 //   ) {
-//     batch = 'Main Production';
+//     return (batch = 'Main Production');
 //   } else if (fmhvPaymentMethod === null) {
-//     batch = 'Main Production';
+//     return (batch = 'Main Production');
+//   } else if (fmhvStage !== null && fmhvStage.includes('AUTO')) {
+//     if (_fktPackage !== null && _fktPackage.includes('AB')) {
+//       return (batch = 'Automation Retouch');
+//     } else if (_fktPackage !== null && !_fktPackage.includes('AB')) {
+//       return (batch = 'Automation');
+//     }
 //   } else {
-//     batch = 'To Loroco';
+//     return (batch = 'To Loroco');
 //   }
 //   return batch;
 // }
+
+async function setBatchCategory() {
+  const fmhvSeason =
+    data?.order?.clientSession?.season?.label ?? null;
+  const fmhvShipCode = data?.order?.shippingMethod?.code ?? null;
+  const shippingMethod = data?.order?.shippingMethod?.label ?? null;
+  const fmhvPaymentMethod = data?.order?.paymentMethod ?? null;
+  const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
+  const _fktPackage = data?.order?.orderPackageString ?? null;
+  batch = 'To Loroco';
+  const postPictureDayArr = [
+    'ORDER_FEE',
+    'CCG_ORDER_FEE',
+    'PPD_$5',
+    'Spec_Reorder',
+  ];
+  const shipToHomeArr = [
+    'SPORT_ORDER',
+    'UC_REORDER',
+    'UC_LATE_ORDER',
+  ];
+  if (
+    (fmhvSeason !== null && fmhvSeason.includes('Senior')) ||
+    (fmhvSeason !== null && fmhvSeason.includes('Year'))
+  ) {
+    batch = 'Main Production';
+  } else if (
+    (shippingMethod !== null &&
+      shippingMethod.includes('Pay to Keep')) ||
+    (shippingMethod !== null &&
+      shippingMethod.includes('Plan C Processing Fee')) ||
+    (shippingMethod !== null &&
+      shippingMethod.includes('Ship to School'))
+  ) {
+    batch = 'Main Production';
+  } else if (shippingMethod === null && fmhvShipCode === null) {
+    if (
+      (_fktPackage !== null && _fktPackage.includes('O-1')) ||
+      (_fktPackage !== null && _fktPackage.includes('OA-1')) ||
+      (_fktPackage !== null && _fktPackage.includes('O-1;BS')) ||
+      (_fktPackage !== null && _fktPackage.includes('OA-1;BS'))
+    ) {
+      batch = 'Main Production';
+    } else if (
+      (_fktPackage !== null && _fktPackage.includes('ENTIRE_PKG_')) ||
+      (_fktPackage !== null && _fktPackage.includes('SPEC_SHEETS'))
+    ) {
+      batch = 'Main Production';
+    }
+  } else if (
+    (fmhvShipCode !== null && fmhvShipCode === 'KEEP_NO CHARGE') ||
+    (fmhvShipCode !== null && fmhvShipCode === 'PLAN_C_SHIP_HOME') ||
+    (fmhvShipCode !== null && fmhvShipCode === 'SHIP_SCHOOL')
+  ) {
+    batch = 'Main Production';
+  } else if (fmhvPaymentMethod === null) {
+    batch = 'Main Production';
+  } else if (fmhvStage !== null && fmhvStage.includes('AUTO')) {
+    if (
+      _fktPackage !== null &&
+      _fktPackage.includes('AB') &&
+      !_fktPackage.includes('DIST_')
+    ) {
+      batch = 'Automation Retouch';
+    } else if (
+      _fktPackage !== null &&
+      !_fktPackage.includes('AB') &&
+      !_fktPackage.includes('DIST_')
+    ) {
+      batch = 'Automation';
+    } else if (
+      _fktPackage !== null &&
+      !_fktPackage.includes('AB') &&
+      _fktPackage.includes('DIST_')
+    ) {
+      batch = 'Automation Novelty';
+    } else if (
+      _fktPackage !== null &&
+      _fktPackage.includes('AB') &&
+      _fktPackage.includes('DIST_')
+    ) {
+      console.log('this condition is true');
+      batch = 'Automation Novelty Retouch';
+    }
+  } else if (
+    shippingMethod !== null &&
+    shippingMethod.includes('Ship to Home')
+  ) {
+    if (fmhvStage.includes('1')) {
+      batch = 'Main Production';
+    } else if (shipToHomeArr.includes(fmhvShipCode)) {
+      console.log('this condition is true');
+      batch = 'To Loroco';
+    } else if (!shipToHomeArr.includes(fmhvShipCode)) {
+      batch = 'To Loroco with Issue';
+    }
+  } else if (
+    shippingMethod !== null &&
+    shippingMethod.includes('Post Picture Day Order Fee')
+  ) {
+    if (fmhvStage.includes('1')) {
+      batch = 'To Loroco with Issue';
+    } else if (postPictureDayArr.includes(fmhvShipCode)) {
+      batch = 'To Loroco';
+    } else if (!postPictureDayArr.includes(fmhvShipCode)) {
+      batch = 'To Loroco with issue';
+    }
+  } else {
+    batch = 'To Loroco';
+  }
+  return batch;
+}
 
 async function processOrders(data) {
   const orderID = data?.order?.id ?? null;
@@ -332,8 +406,8 @@ async function processOrders(data) {
     data?.order?.orderFormEntrys[0]?.values[
       '01EXHTW1QVV693FP129G1R38HE'
     ] ?? null; // sports form FAIWPO2JMM-8B2-CW31LJ
-  const paperLength = findPaperLength();
-  // const batchCategory = await setBatchCategory();
+  const paperLength = await findPaperLength();
+  const batchCategory = await setBatchCategory();
 
   // These will not be from FM response, but we're filling them in regardless
   const datePulled = Date.now();
@@ -392,7 +466,7 @@ async function processOrders(data) {
       coach: coach,
       jerseyNumber: jerseyNumber,
       batchID: batchID,
-      batchCategory: setBatchCategory(),
+      batchCategory: batchCategory,
       lorocoNumber: lorocoNumber,
       batchSequence: batchSequence,
       paperLength: paperLength,
