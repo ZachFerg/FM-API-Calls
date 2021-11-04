@@ -24,23 +24,23 @@ const fm_yesterday = formatDate(yesterday);
 const fm_day_before = formatDate(day_before);
 
 // takes url and appends parameters
-// const param_url = new URL(
-//   `https://api.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&`,
-// );
-// const params = { from: fm_day_before, to: fm_yesterday };
-// Object.keys(params).forEach((key) =>
-//   param_url.searchParams.append(key, params[key]),
-// );
-
 const param_url = new URL(
-  `https://api.staging.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&`,
+  `https://api.fotomerchanthv.com/orders?limit=10&type=all&orderDir=ASC&`,
 );
+const params = { from: fm_day_before, to: fm_yesterday };
+Object.keys(params).forEach((key) =>
+  param_url.searchParams.append(key, params[key]),
+);
+
+// const param_url = new URL(
+//   `https://api.staging.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&`,
+// );
 
 const config = {
   method: 'get',
   headers: {
-    // Authorization: process.env.FM_API_KEY,
-    Authorization: process.env.FM_STAGE_API_KEY,
+    Authorization: process.env.FM_API_KEY,
+    // Authorization: process.env.FM_STAGE_API_KEY,
   },
 };
 
@@ -61,7 +61,7 @@ async function getAllOrderIds() {
       );
       console.log(repo.data.paging);
       results = results.concat(repo.data.orders);
-      } while (repo.data.paging.page < repo.data.paging.last);
+    } while (repo.data.paging.page < repo.data.paging.last);
     // } while (repo.data.paging.page < 3);
 
     return results;

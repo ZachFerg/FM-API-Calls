@@ -17,6 +17,11 @@ function formatDate(date) {
   return [year, month, day].join('-');
 }
 
+/**
+ * finds the amount of objects in an object
+ * @param {object} obj
+ * @returns
+ */
 function objectLength(obj) {
   let result = 0;
   for (let prop in obj) {
@@ -27,19 +32,57 @@ function objectLength(obj) {
   return result;
 }
 
+// const batchInfo = {
+//   batchJobs: [
+//     {
+//       type: "order_distribution_df",
+//       batchReference: "B21-930-AGSN58",
+//       state: "STATE_QUEUED_FOR_PROCESSING",
+//       shippingAddress: {
+//         name: "Strawbridge Studios",
+//         firstName: "Strawbridge",
+//         lastName: "Studios",
+//         phone: "18003269080",
+//         address1: "13616 Hillsborough Rd",
+//         city: "Durham",
+//         zipCode: "27705",
+//         state: "US-NC",
+//         stateLabel: "NC",
+//         country: "US",
+//         countryLabel: "United States",
+//         id: 14303,
+//       },
+//       sortOrder: [
+//         {
+//           property: "orders.id",
+//           direction: "desc",
+//         },
+//       ],
+//       shippingMethod: {
+//         id: "01FCYX3QCC4WNY6727PWTSCGCS",
+//         type: "bulk_special",
+//         supplierCode: "ORDER_FEE",
+//         label: "Post Picture Day Order Fee",
+//       },
+//       totalOrders: 1,
+//       id: "01FGW759HV6VA3WS8SQ9SD8WSY",
+//     },
+//   ],
+// };
+
 /**
  *
  * @returns {array} res.data - response object from endpoint
  */
-async function pullOrders() {
-  // const today = formatDate(Date.now());
+async function pullOrders(batchCategory) {
+  const today = formatDate(Date.now());
   //   const today = '2021-09-24';
-  const today = '2021-10-07';
-  //   console.log(today);
+  //   const today = '2021-10-07';
+  // console.log(today);
 
   try {
     let res = await axios.get(
-      `http://localhost:5000/api/orders/getOrders/${today}`,
+      `http://localhost:5000/api/orders/getOrders/${today}/${batchCategory}`,
     );
     if (res.status == 200) {
       console.log(res.data.length + ' Orders pulled for today');
@@ -50,23 +93,72 @@ async function pullOrders() {
   }
 }
 
+// /**
+//  *
+//  * @param {array} orders - the response object from pullOrders()
+//  * @param {number} threshold - the limit the paperLength can exceed
+//  * @returns {array} batchArr - array of objects containing batch data
+//  */
+// async function setBatches(orders, threshold) {
+//   let i;
+//   let totalBatchLength = 0;
+//   let batchSequence = 1;
+//   let batchID = (await getBatchID()) + 1;
+//   console.log(batchID);
+//   let newArr = [];
+//   let batchArr = [];
+
+//   for (i = 0; i < orders.length; i++) {
+//     if (i < orders.length && totalBatchLength < threshold) {
+//       totalBatchLength += orders[i].paperLength;
+//       newArr.push({
+//         idorders: orders[i].idorders,
+//         orderID: orders[i].orderID,
+//         batchID: batchID,
+//         batchSequence: batchSequence,
+//         totalBatchLength: totalBatchLength,
+//         batchCategory: orders[i].batchCategory,
+//       });
+//       batchSequence += 1;
+//     } else {
+//       totalBatchLength = 0;
+//       totalBatchLength += orders[i].paperLength;
+//       batchArr.push(...newArr);
+//       newArr.length = 0;
+//       batchSequence = 1;
+//       batchID += 1;
+//       newArr.push({
+//         idorders: orders[i].idorders,
+//         orderID: orders[i].orderID,
+//         batchID: batchID,
+//         batchSequence: batchSequence,
+//         totalBatchLength: totalBatchLength,
+//         batchCategory: orders[i].batchCategory,
+//       });
+//       batchSequence += 1;
+//     }
+//   }
+//   batchArr.push(...newArr);
+//   return batchArr;
+// }
+
 /**
- *
+ * Using this until paperLength is fixed
  * @param {array} orders - the response object from pullOrders()
- * @param {number} threshold - the limit the paperLength can't exceed
+ * @param {number} orderThreshold - the amount of orders we can exceed
  * @returns {array} batchArr - array of objects containing batch data
  */
-async function setBatches(orders, threshold) {
+async function setBatchesBandAid(orders, orderThreshold) {
   let i;
   let totalBatchLength = 0;
+  let orderTotalLength = 0;
   let batchSequence = 1;
   let batchID = (await getBatchID()) + 1;
-  console.log(batchID);
   let newArr = [];
   let batchArr = [];
 
   for (i = 0; i < orders.length; i++) {
-    if (i < orders.length && totalBatchLength < threshold) {
+    if (i < orders.length && orderTotalLength < orderThreshold) {
       totalBatchLength += orders[i].paperLength;
       newArr.push({
         idorders: orders[i].idorders,
@@ -77,8 +169,10 @@ async function setBatches(orders, threshold) {
         batchCategory: orders[i].batchCategory,
       });
       batchSequence += 1;
+      orderTotalLength += 1;
     } else {
       totalBatchLength = 0;
+      orderTotalLength = 0;
       totalBatchLength += orders[i].paperLength;
       batchArr.push(...newArr);
       newArr.length = 0;
@@ -93,6 +187,7 @@ async function setBatches(orders, threshold) {
         batchCategory: orders[i].batchCategory,
       });
       batchSequence += 1;
+      orderTotalLength += 1;
     }
   }
   batchArr.push(...newArr);
@@ -148,6 +243,7 @@ async function updateOrdersTable(Arr) {
       'Content-Type': 'application/json',
     },
   };
+  // add error handling here
   try {
     for (let i = 0; i < Arr.length; i++) {
       repo = await axios.put(
@@ -184,7 +280,7 @@ async function makeAPIBatchCall(arr) {
         },
       ],
       sendTo: 'ship_to_address',
-      shippingMethod: '01FCYX3QCC4WNY6727PWTSCGCS',
+      shippingMethod: '01FG9QMAK08HDSHTBSFFDAB7GS',
       address: {
         name: 'Strawbridge Studios',
         phone: '+1 800 326 9080',
@@ -198,15 +294,20 @@ async function makeAPIBatchCall(arr) {
   };
 
   let param_url = new URL(
-    `https://api.staging.fotomerchanthv.com/batch_jobs`,
+    `https://api.fotomerchanthv.com/batch_jobs`,
   );
+
+  // let param_url = new URL(
+  //   `https://api.staging.fotomerchanthv.com/batch_jobs`,
+  // );
 
   const config = {
     method: 'post',
     url: param_url.href,
     data: fmPayload,
     headers: {
-      Authorization: process.env.FM_STAGE_API_KEY,
+      Authorization: process.env.FM_API_KEY,
+      // Authorization: process.env.FM_STAGE_API_KEY,
     },
   };
 
@@ -237,26 +338,74 @@ async function groupBy(arr, property) {
   }, {});
 }
 
+/**
+ * Takes the results from Fotomerchant, combines with the
+ * batch information set by Strawbridge, and posts to the DB.
+ * @param {object} results
+ * @param {object} fmBatchInfo
+ */
 async function updateBatchTable(results, fmBatchInfo) {
   const batchInfo = [];
   const fmBatchRef = [];
   const batchLengthInfo = [];
+  const resultKeys = Object.keys(results);
 
   let fmObjcount = objectLength(fmBatchInfo);
+  const batchCat =
+    results[resultKeys[0]][Object.keys(results[resultKeys[0]])[0]]
+      .batchCategory;
+
+  async function setRetouching(batchCat) {
+    if (
+      batchCat === 'Automation Retouch' ||
+      batchCat === 'Automation Novelty Retouch'
+    ) {
+      retouch = 1;
+      retouchQC = 1;
+    } else {
+      retouch = 0;
+      retouchQC = 0;
+    }
+    return [retouch, retouchQC];
+  }
+
+  async function setRipType(batchCat) {
+    if (
+      batchCat === 'Automation Novelty' ||
+      batchCat === 'Automation Novelty Retouch'
+    ) {
+      ripType = 'Novelty';
+    } else {
+      ripType = 'Underclass';
+    }
+    return ripType;
+  }
+
+  // fields for DB creation
+  const recQC = 1;
+  const xmlQC = 1;
+  const preRipQC = 1;
+  const postRipQC = 1;
+  let retouchConfig = await setRetouching(batchCat);
+  retouch = retouchConfig[0];
+  retouchQC = retouchConfig[1];
 
   const paperSurface = 'Glossy';
   const paperWidth = 10;
   const envelopeType = 'UC';
   const shipMethod = 'S2H';
-  const retouch = 1;
-  const retouchQC = 1;
+  ripType = await setRipType(batchCat);
+  const currentStage = 'Batch Requested';
+  const batchCreationTimestamp = new Date()
+    .toISOString()
+    .slice(0, 19)
+    .replace('T', ' ');
 
   for (let i = 0; i < fmObjcount; i++) {
     let fmBatchId = fmBatchInfo[i].batchJobs[0].batchReference;
+    // let fmBatchId = "B21-930-AGSN58";
     fmBatchRef.push(fmBatchId);
   }
-
-  const resultKeys = Object.keys(results);
 
   for (let y = 0; y < resultKeys.length; y++) {
     totalBatchLength =
@@ -280,14 +429,20 @@ async function updateBatchTable(results, fmBatchInfo) {
       batchLength: zipped[b][2],
       envelopeType: envelopeType,
       shipMethod: shipMethod,
-      recQC: 1,
-      preRipQC: 1,
-      postRipQC: 1,
+      recQC: recQC,
+      xmlQC: xmlQC,
+      preRipQC: preRipQC,
+      postRipQC: postRipQC,
       retouch: retouch,
       retouchQC: retouchQC,
+      batchCreationTimestamp: batchCreationTimestamp,
+      currentStage: currentStage,
+      ripType: ripType,
     };
     batchInfo.push(batchPayload);
   }
+
+  console.log(batchInfo);
 
   const param_url = new URL(
     `http://localhost:5000/api/batches/batches/`,
@@ -310,14 +465,55 @@ async function updateBatchTable(results, fmBatchInfo) {
   }
 }
 
-async function buildBatchLogic() {
-  let orders = await pullOrders();
-  let batches = await setBatches(orders, 100); // <- Set threshold here
+async function buildBatchLogicAutomation() {
+  let orders = await pullOrders('Automation');
+  // let batches = await setBatches(orders, 100); // <- Set threshold here
+  let batches = await setBatchesBandAid(orders, 300);
   let cleanedData = await cleanOrderObj(batches);
-  updateOrdersTable(cleanedData);
+  await updateOrdersTable(cleanedData);
   let batchingGroup = await groupBy(batches, 'batchID');
   let batchInfo = await sendBatchInfo(batchingGroup);
-  updateBatchTable(batchingGroup, batchInfo);
+  await updateBatchTable(batchingGroup, batchInfo);
 }
 
-// buildBatchLogic();
+async function buildBatchLogicAutomationRetouch() {
+  let orders = await pullOrders('Automation Retouch');
+  // let batches = await setBatches(orders, 100); // <- Set threshold here
+  let batches = await setBatchesBandAid(orders, 300);
+  let cleanedData = await cleanOrderObj(batches);
+  await updateOrdersTable(cleanedData);
+  let batchingGroup = await groupBy(batches, 'batchID');
+  let batchInfo = await sendBatchInfo(batchingGroup);
+  await updateBatchTable(batchingGroup, batchInfo);
+}
+
+async function buildBatchLogicAutomationNovelty() {
+  let orders = await pullOrders('Automation Novelty');
+  // let batches = await setBatches(orders, 100); // <- Set threshold here
+  let batches = await setBatchesBandAid(orders, 300);
+  let cleanedData = await cleanOrderObj(batches);
+  await updateOrdersTable(cleanedData);
+  let batchingGroup = await groupBy(batches, 'batchID');
+  let batchInfo = await sendBatchInfo(batchingGroup);
+  await updateBatchTable(batchingGroup, batchInfo);
+}
+
+async function buildBatchLogicAutomationNoveltyRetouch() {
+  let orders = await pullOrders('Automation Novelty Retouch');
+  // let batches = await setBatches(orders, 100); // <- Set threshold here
+  let batches = await setBatchesBandAid(orders, 300);
+  let cleanedData = await cleanOrderObj(batches);
+  await updateOrdersTable(cleanedData);
+  let batchingGroup = await groupBy(batches, 'batchID');
+  let batchInfo = await sendBatchInfo(batchingGroup);
+  await updateBatchTable(batchingGroup, batchInfo);
+}
+
+async function doAllBatches() {
+  await buildBatchLogicAutomation();
+  await buildBatchLogicAutomationRetouch();
+  await buildBatchLogicAutomationNovelty();
+  await buildBatchLogicAutomationNoveltyRetouch();
+}
+
+doAllBatches();
