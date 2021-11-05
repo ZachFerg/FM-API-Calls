@@ -280,7 +280,7 @@ async function makeAPIBatchCall(arr) {
         },
       ],
       sendTo: 'ship_to_address',
-      shippingMethod: '01FG9QMAK08HDSHTBSFFDAB7GS',
+      shippingMethod: '01FJX2KDX7RGNNEYJG4CV3NY84',
       address: {
         name: 'Strawbridge Studios',
         phone: '+1 800 326 9080',
