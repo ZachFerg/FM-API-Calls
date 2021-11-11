@@ -32,6 +32,8 @@ function objectLength(obj) {
   return result;
 }
 
+// test data
+
 // const batchInfo = {
 //   batchJobs: [
 //     {
@@ -472,8 +474,8 @@ async function buildBatchLogicAutomation() {
   let cleanedData = await cleanOrderObj(batches);
   await updateOrdersTable(cleanedData);
   let batchingGroup = await groupBy(batches, 'batchID');
-  let batchInfo = await sendBatchInfo(batchingGroup);
-  await updateBatchTable(batchingGroup, batchInfo);
+  // let batchInfo = await sendBatchInfo(batchingGroup);
+  // await updateBatchTable(batchingGroup, batchInfo);
 }
 
 async function buildBatchLogicAutomationRetouch() {
@@ -511,9 +513,9 @@ async function buildBatchLogicAutomationNoveltyRetouch() {
 
 async function doAllBatches() {
   await buildBatchLogicAutomation();
-  await buildBatchLogicAutomationRetouch();
-  await buildBatchLogicAutomationNovelty();
-  await buildBatchLogicAutomationNoveltyRetouch();
+  // await buildBatchLogicAutomationRetouch();
+  // await buildBatchLogicAutomationNovelty();
+  // await buildBatchLogicAutomationNoveltyRetouch();
 }
 
-doAllBatches();
+// doAllBatches();
