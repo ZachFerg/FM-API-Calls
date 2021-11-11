@@ -1,5 +1,5 @@
-const axios = require("axios");
-const axiosRetry = require("axios-retry");
+const axios = require('axios');
+const axiosRetry = require('axios-retry');
 
 // async function test1() {
 //   const todoIdList = [1, 2, 3, 4];
@@ -28,7 +28,7 @@ const axiosRetry = require("axios-retry");
 //   }
 //   console.timeEnd('for {}');
 // }
-
+console.log('hi roger');
 // test1();
 // test2();
 
@@ -46,8 +46,8 @@ async function axiosRetryThing() {
   });
 
   const response = await axios({
-    method: "GET",
-    url: "https://httpstat.us/503",
+    method: 'GET',
+    url: 'https://httpstat.us/503',
   }).catch((err) => {
     console.log(err);
     // if (err.response.status !== 200) {
