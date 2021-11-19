@@ -1,20 +1,9 @@
-require("dotenv").config({ path: "../.ENV" });
-const axios = require("axios");
-const axiosRetry = require("axios-retry");
-const fs = require("fs");
-const path = require("path");
-
-function formatDate(date) {
-  var d = new Date(date),
-    month = "" + (d.getMonth() + 1),
-    day = "" + d.getDate(),
-    year = d.getFullYear();
-
-  if (month.length < 2) month = "0" + month;
-  if (day.length < 2) day = "0" + day;
-
-  return [year, month, day].join("-");
-}
+require('dotenv').config({ path: '../.ENV' });
+const axios = require('axios');
+const axiosRetry = require('axios-retry');
+const fs = require('fs');
+const path = require('path');
+const { formatDate } = require('../helpers/formatFunctions');
 
 const today = new Date();
 const yesterday = new Date(today);
@@ -27,51 +16,25 @@ const fm_yesterday = formatDate(yesterday);
 const fm_day_before = formatDate(day_before);
 
 const param_url = new URL(
-  `https://api.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&`
+  `https://api.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&`,
 );
 
 const params = { from: fm_day_before, to: fm_yesterday };
 Object.keys(params).forEach((key) =>
-  param_url.searchParams.append(key, params[key])
+  param_url.searchParams.append(key, params[key]),
 );
 
-// const param_url = new URL(
-//   `https://api.staging.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&`,
-// );
-
 const config = {
-  method: "get",
+  method: 'get',
   headers: {
     Authorization: process.env.FM_API_KEY,
-    // Authorization: process.env.FM_STAGE_API_KEY,
   },
 };
 
 // console.log(param_url.href);
 
-// async function getAllOrderIds() {
-//   console.log("Starting Get List Orders call.....");
-
-//   let repo = null;
-//   page_count = 1;
-//   results = [];
-
-//   try {
-//     do {
-//       repo = await axios.get(`${param_url.href}&page=${page_count++}`, config);
-//       console.log(repo.data.paging);
-//       results = results.concat(repo.data.orders);
-//       // } while (repo.data.paging.page < repo.data.paging.last);
-//     } while (repo.data.paging.page < 3);
-
-//     return results;
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
-
 async function getAllOrderIds() {
-  console.log("Starting Get List Orders call.....");
+  console.log('Starting Get List Orders call.....');
 
   let repo = null;
   page_count = 1;
@@ -93,15 +56,18 @@ async function getAllOrderIds() {
     try {
       repo = await axios(
         `${param_url.href}&page=${page_count++}`,
-        config
+        config,
       ).catch((err) => {
         console.log(err);
       });
 
-      const orderIDList = repo.data.orders.reduce((orderIDList, { id }, i) => {
-        orderIDList.push(id);
-        return orderIDList;
-      }, []);
+      const orderIDList = repo.data.orders.reduce(
+        (orderIDList, { id }, i) => {
+          orderIDList.push(id);
+          return orderIDList;
+        },
+        [],
+      );
 
       results = results.concat(orderIDList);
       console.log(repo.data.paging);
@@ -130,7 +96,7 @@ async function writeToFile(array) {
   const today = formatDate(new Date());
   const __dirname = path.resolve();
   const writeStream = fs.createWriteStream(
-    __dirname + `/ordertexts/${today}-orderIDs.txt`
+    __dirname + `/ordertexts/${today}-orderIDs.txt`,
   );
   const pathName = writeStream.path;
 
@@ -138,12 +104,14 @@ async function writeToFile(array) {
   array.forEach((value) => writeStream.write(`${value}\n`));
 
   // the finish event is emitted when all data has been flushed from the stream
-  writeStream.on("finish", () => {
+  writeStream.on('finish', () => {
     console.log(`wrote all the array data to file ${pathName}`);
   });
 
-  writeStream.on("error", (err) => {
-    console.error(`There is an error writing the file ${pathName} => ${err}`);
+  writeStream.on('error', (err) => {
+    console.error(
+      `There is an error writing the file ${pathName} => ${err}`,
+    );
   });
 
   // close the stream

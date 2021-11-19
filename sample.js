@@ -1,61 +1,88 @@
 const axios = require('axios');
-const axiosRetry = require('axios-retry');
+require('dotenv').config();
+const orderList = require('./api/orderList');
 
-// async function test1() {
-//   const todoIdList = [1, 2, 3, 4];
-//   console.time('.map()');
-//   await Promise.all(
-//     todoIdList.map(async (id) => {
-//       const response = await fetch(
-//         `https://jsonplaceholder.typicode.com/todos/${id}`,
-//       );
-//       const todo = await response.json();
-//       console.log(todo.title);
-//     }),
-//   );
-//   console.timeEnd('.map()');
-// }
+axios.defaults.headers.common['Authorization'] =
+  process.env.FM_API_KEY;
 
-// async function test2() {
-//   const todoIdList = [1, 2, 3, 4];
-//   console.time('for {}');
-//   for (const id of todoIdList) {
-//     const response = await fetch(
-//       `https://jsonplaceholder.typicode.com/todos/${id}`,
-//     );
-//     const todo = await response.json();
-//     console.log(todo.title);
-//   }
-//   console.timeEnd('for {}');
-// }
-console.log('hi roger');
-// test1();
-// test2();
+function processOrders(data) {
+  let result = [];
+  for (let i = 0; i < data.length; i++) {
+    // take all this crap and rewrite it into a function we can pass here that returns payload
+    const orderID = data[i]?.order?.id ?? null;
+    const _fknShootNumber =
+      data[i]?.order?.clientSession?.externalReference ?? null;
+    const _fktCustomerNo =
+      data[i]?.order?.clientSession?.client?.externalReference ??
+      null;
+    const customerName = data[i]?.order?.recipientName ?? null;
+    const emailAddress = data[i]?.order?.recipientEmail ?? null;
 
-async function axiosRetryThing() {
-  axiosRetry(axios, {
-    retries: 3, // number of retries
-    retryDelay: (retryCount) => {
-      console.log(`retry attempt: ${retryCount}`);
-      return retryCount * 2000; // time interval between retries
-    },
-    retryCondition: (error) => {
-      // if retry condition is not specified, by default idempotent requests are retried
-      return error.response.status === 503;
-    },
-  });
+    const finalPayload = {
+      orderID: orderID,
+      _fknShootNumber: _fknShootNumber,
+      _fktCustomerNo: _fktCustomerNo,
+      customerName: customerName,
+      emailAddress: emailAddress,
+    };
+    result.push(finalPayload);
+  }
 
-  const response = await axios({
-    method: 'GET',
-    url: 'https://httpstat.us/503',
-  }).catch((err) => {
-    console.log(err);
-    // if (err.response.status !== 200) {
-    //   throw new Error(
-    //     `API call failed with status code: ${err.response.status} after 3 retry attempts`,
-    //   );
-    // }
-  });
+  return result;
 }
 
-axiosRetryThing();
+function fetchOrder(order_id) {
+  const url = `https://api.fotomerchanthv.com/orders/${order_id}/lab`;
+  return axios.get(url).then((res) => res.data);
+}
+
+/**
+ *
+ * @param {array} items
+ * @param {function} fn
+ * @returns
+ */
+function all(items, fn) {
+  const promises = items.map((item) => fn(item));
+  return Promise.all(promises);
+}
+
+function series(items, fn) {
+  let result = [];
+  return items
+    .reduce((acc, item) => {
+      acc = acc.then(() => {
+        return fn(item).then((res) => result.push(res));
+      });
+      return acc;
+    }, Promise.resolve())
+    .then(() => result);
+}
+
+function splitToChunks(items, chunkSize = 50) {
+  const result = [];
+  for (let i = 0; i < items.length; i += chunkSize) {
+    result.push(items.slice(i, i + chunkSize));
+  }
+  return result;
+}
+
+function chunks(items, fn, chunkSize = 50) {
+  let result = [];
+  const chunks = splitToChunks(items, chunkSize);
+  return series(chunks, (chunk) => {
+    console.log(chunk);
+    return all(chunk, fn)
+      .then((res) => (data = processOrders(res)))
+      .then((data) => postToDB(data));
+  }).then(() => console.log('done!'));
+}
+
+function postToDB(payload) {
+  const url = `http://localhost:5000/api/orders/orders/`;
+  return axios
+    .post(url, payload)
+    .then((res) => console.log(res.data));
+}
+
+const testing = chunks(orderList, fetchOrder);

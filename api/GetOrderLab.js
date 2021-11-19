@@ -1,85 +1,18 @@
 require('dotenv').config({ path: '../.ENV' });
 const axios = require('axios');
-const request = require('request');
-const helperOBJ = require('../helpers/optionObjects');
+const fs = require('fs');
+const path = require('path');
+// const request = require('request');
+const {
+  formatRelationship,
+  formatGrade,
+  formatSport,
+  formatDate,
+} = require('../helpers/formatFunctions');
+const orderList = require('./orderList');
 
 const orders = [];
-
-// const orderIdList = [
-//   '01FM2HHQZMWR3S0W5GAJ3DZJCS',
-//   '01FM2HVCS2YW326DZFAVEQBH11',
-//   '01FM2J0YNW4MB2XPMV9Y4H40QT',
-//   '01FM2J3WJDMMGPV8STR58QYZWA',
-//   '01FM2J78RY17SA7VT3F7DVV04H',
-//   '01FM2JC9HE3ZE32PXSRR5VCB9Y',
-//   '01FM2JEXKGME0PR278PMYN03ZF',
-//   '01FM2JH7V4Y4D09P4EQJSJGP90',
-//   '01FM2JKQSGHYMB6ZV3QN1GEWKS',
-//   '01FM2JP1GVYRYM41F4RFQ4EWPT',
-//   '01FM2JR78WVZSAHPEWR38WQCYC',
-//   '01FM2NC620FT35RPYA15N7S6EA',
-//   '01FM2NGRTKSBP99KXEC82RQQVP',
-//   '01FM2NKERJCXH2WA091SZSXEBP',
-//   '01FM2NNXN5HKNTMZR3WJTGQAA6',
-//   '01FM2NRMKR0Y0DQZQK8T0KW8N9',
-//   '01FM2NTMX4A16JGQ0Q71Y0FEAD',
-//   '01FM2NWS3C3YDDFC1ZN1QQYS9X',
-//   '01FM2NYV13DA1VPYB28ZPTCWZS',
-//   '01FM2P0KV49VD89X4Y7MQFW9RQ',
-//   '01FM2P2FK5HF1234T9KH8M8K9T',
-//   '01FM2P4AAD5T8PA1HH3NXZPGSH',
-// ];
-
-function formatRelationship(string) {
-  studString = string;
-  if (studString == null) {
-    result = null;
-  } else {
-    result = studString.replace(
-      studString,
-      (m) => helperOBJ.studentRelationship[m],
-    );
-  }
-  return result;
-}
-
-function formatGrade(string) {
-  gradeString = string;
-  if (gradeString == null) {
-    result = null;
-  } else {
-    result = gradeString.replace(
-      gradeString,
-      (m) => helperOBJ.gradeMap[m],
-    );
-  }
-  return result;
-}
-
-function formatSport(string) {
-  sportString = string;
-  if (sportString == null) {
-    result = null;
-  } else {
-    result = sportString.replace(
-      sportString,
-      (m) => helperOBJ.sportsMap[m],
-    );
-  }
-  return result;
-}
-
-function formatDate(date) {
-  var d = new Date(date),
-    month = '' + (d.getMonth() + 1),
-    day = '' + d.getDate(),
-    year = d.getFullYear();
-
-  if (month.length < 2) month = '0' + month;
-  if (day.length < 2) day = '0' + day;
-
-  return [year, month, day].join('-');
-}
+let badIDs = [];
 
 /**
  * finds the amount of objects in an object
@@ -105,7 +38,7 @@ async function findPaperLength() {
   let orderPaperLength = 0;
   let paperLength = 0;
   let packageLength = objectLength(data?.order?.orderItems);
-  console.log(packageLength);
+  // console.log(packageLength);
   for (let i = 0; i < packageLength; i++) {
     let orderLength = objectLength(
       data?.order?.orderItems[i]?.orderItems,
@@ -138,31 +71,28 @@ async function findPaperLength() {
  * @returns {object} res.data response from Fotomerchant
  */
 async function getOrderLab(order_id) {
-  console.log('Starting Get Order Lab call for: ', order_id);
   let param_url = new URL(
     `https://api.fotomerchanthv.com/orders/${order_id}/lab`,
   );
-  // let param_url = new URL(
-  //   `https://api.staging.fotomerchanthv.com/orders/${order_id}/lab`,
-  // );
 
   const config = {
     method: 'get',
     url: param_url.href,
     headers: {
       Authorization: process.env.FM_API_KEY,
-      // Authorization: process.env.FM_STAGE_API_KEY,
     },
   };
 
   try {
     let res = await axios(config);
     if (res.status == 200) {
-      console.log('Order Call successful...');
+      console.log('Order Call', order_id, 'successful...');
     }
     return res.data;
   } catch (err) {
-    console.error(err);
+    console.log('Order Call', order_id, 'unsuccessful...');
+    badIDs.push(order_id);
+    // console.error(err);
   }
 }
 
@@ -472,6 +402,32 @@ async function processOrders(data) {
   }
 }
 
+async function writeToFile(array) {
+  const today = formatDate(new Date());
+  const __dirname = path.resolve();
+  const writeStream = fs.createWriteStream(
+    __dirname + `/${today}-badIDs.txt`,
+  );
+  const pathName = writeStream.path;
+
+  // write each value of the array on the file breaking line
+  array.forEach((value) => writeStream.write(`${value}\n`));
+
+  // the finish event is emitted when all data has been flushed from the stream
+  writeStream.on('finish', () => {
+    console.log(`wrote all the array data to file ${pathName}`);
+  });
+
+  writeStream.on('error', (err) => {
+    console.error(
+      `There is an error writing the file ${pathName} => ${err}`,
+    );
+  });
+
+  // close the stream
+  writeStream.end();
+}
+
 async function sendResults(orderIDList) {
   try {
     for (let i = 0; i < orderIDList.length; i++) {
@@ -480,8 +436,12 @@ async function sendResults(orderIDList) {
       let orders = await processOrders(data);
     }
   } catch (err) {
-    console.error(err);
+    console.log('oops');
+    badIDs.push(order_id);
+    console.log(badIDs);
+    // console.error(err);
   } finally {
+    await writeToFile(badIDs);
     request.post(
       {
         url: 'http://localhost:3000/orders',
@@ -489,7 +449,8 @@ async function sendResults(orderIDList) {
         json: true,
       },
       function (error, response, body) {
-        console.log(error);
+        // console.log('response: ', response);
+        console.log('error: ', error);
       },
       console.log('Posting to Database'),
     );
@@ -497,6 +458,6 @@ async function sendResults(orderIDList) {
   }
 }
 
-// sendResults(orderIdList);
+sendResults(orderList);
 
 module.exports = { getOrderLab, processOrders, sendResults };

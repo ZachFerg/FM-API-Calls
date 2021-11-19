@@ -7,18 +7,20 @@ const app = express();
 const hostname = '127.0.0.1';
 const port = 3000;
 
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '100mb' }));
 
 // main page
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(
     `Fotomerchant Application listening at http://${hostname}:${port}`,
   );
 });
+
+server.setTimeout(0);
 
 // Display all orders
 app.get('/orders', (request, response) => {
@@ -42,11 +44,14 @@ app.post('/orders', (request, response) => {
     );
     let sql =
       'INSERT INTO ' + table + ' (' + keys.join(',') + ') VALUES ?';
+    // console.log(keys);
+    // console.log(values);
     connection.query(
       sql,
       [values],
       function (error, results, fields) {
         if (error) return callback(error);
+        // console.log(results);
         return callback(null, results);
       },
     );
@@ -54,7 +59,9 @@ app.post('/orders', (request, response) => {
 
   bulkInsert(connection, 'orders', request.body, (err, result) => {
     if (err) {
-      console.log(err);
+      // console.log(err);
+      console.log(err.code);
+      console.log(err.message);
       response.send(err);
     } else {
       return response.send('orders were added to the database');
