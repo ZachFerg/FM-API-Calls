@@ -1,6 +1,7 @@
 require('dotenv').config();
 const getOrderLab = require('./api/GetOrderLab');
 const getListOrders = require('./api/GetListOrders');
+const axios = require('axios');
 
 function doLorocoCall() {
   const url = `fmp://FM.Server:IdesOfMarch@192.168.1.180/LOROCO.fmp12?script=(FMP)%20Fotomerchant%20Lorocos `;
