@@ -70,8 +70,6 @@ async function getAllOrderIds() {
       );
 
       results = results.concat(orderIDList);
-      console.log(repo.data.paging);
-      // console.log(results.length);
     } catch (err) {
       console.log(err);
     }
@@ -79,20 +77,7 @@ async function getAllOrderIds() {
   return results;
 }
 
-// async function gatherAllIDs(data) {
-//   const orderIDList = [];
-//   try {
-//     data.forEach(function (order) {
-//       orderIDList.push(order.id);
-//     });
-//     return orderIDList;
-//   } catch (err) {
-//     console.error(err);
-//   }
-//   console.log(orderIDList);
-// }
-
-async function writeToFile(array) {
+function writeToFile(array) {
   const today = formatDate(new Date());
   const __dirname = path.resolve();
   const writeStream = fs.createWriteStream(
@@ -122,7 +107,7 @@ async function sendOrderList() {
   let data = await getAllOrderIds();
   // let orderIDList = await gatherAllIDs(data);
   // let orderIDList = await gatherAllIDs(data);
-  await writeToFile(data);
+  writeToFile(data);
   return data;
 }
 
