@@ -33,41 +33,40 @@ function objectLength(obj) {
 }
 
 // test data
-
 // const batchInfo = {
 //   batchJobs: [
 //     {
-//       type: "order_distribution_df",
-//       batchReference: "B21-930-AGSN58",
-//       state: "STATE_QUEUED_FOR_PROCESSING",
+//       type: 'order_distribution_df',
+//       batchReference: 'B21-930-AGSN58',
+//       state: 'STATE_QUEUED_FOR_PROCESSING',
 //       shippingAddress: {
-//         name: "Strawbridge Studios",
-//         firstName: "Strawbridge",
-//         lastName: "Studios",
-//         phone: "18003269080",
-//         address1: "13616 Hillsborough Rd",
-//         city: "Durham",
-//         zipCode: "27705",
-//         state: "US-NC",
-//         stateLabel: "NC",
-//         country: "US",
-//         countryLabel: "United States",
+//         name: 'Strawbridge Studios',
+//         firstName: 'Strawbridge',
+//         lastName: 'Studios',
+//         phone: '18003269080',
+//         address1: '13616 Hillsborough Rd',
+//         city: 'Durham',
+//         zipCode: '27705',
+//         state: 'US-NC',
+//         stateLabel: 'NC',
+//         country: 'US',
+//         countryLabel: 'United States',
 //         id: 14303,
 //       },
 //       sortOrder: [
 //         {
-//           property: "orders.id",
-//           direction: "desc",
+//           property: 'orders.id',
+//           direction: 'desc',
 //         },
 //       ],
 //       shippingMethod: {
-//         id: "01FCYX3QCC4WNY6727PWTSCGCS",
-//         type: "bulk_special",
-//         supplierCode: "ORDER_FEE",
-//         label: "Post Picture Day Order Fee",
+//         id: '01FCYX3QCC4WNY6727PWTSCGCS',
+//         type: 'bulk_special',
+//         supplierCode: 'ORDER_FEE',
+//         label: 'Post Picture Day Order Fee',
 //       },
 //       totalOrders: 1,
-//       id: "01FGW759HV6VA3WS8SQ9SD8WSY",
+//       id: '01FGW759HV6VA3WS8SQ9SD8WSY',
 //     },
 //   ],
 // };
@@ -78,8 +77,6 @@ function objectLength(obj) {
  */
 async function pullOrders(batchCategory) {
   const today = formatDate(Date.now());
-  //   const today = '2021-09-24';
-  //   const today = '2021-10-07';
   // console.log(today);
 
   try {
@@ -405,7 +402,7 @@ async function updateBatchTable(results, fmBatchInfo) {
 
   for (let i = 0; i < fmObjcount; i++) {
     let fmBatchId = fmBatchInfo[i].batchJobs[0].batchReference;
-    // let fmBatchId = "B21-930-AGSN58";
+    // let fmBatchId = 'B21-930-AGSN58';
     fmBatchRef.push(fmBatchId);
   }
 
@@ -444,7 +441,7 @@ async function updateBatchTable(results, fmBatchInfo) {
     batchInfo.push(batchPayload);
   }
 
-  console.log(batchInfo);
+  // console.log(batchInfo);
 
   const param_url = new URL(
     `http://localhost:5000/api/batches/batches/`,
@@ -469,17 +466,26 @@ async function updateBatchTable(results, fmBatchInfo) {
 
 async function buildBatchLogicAutomation() {
   let orders = await pullOrders('Automation');
+  if (orders.length == 0) {
+    console.log('No orders containing Automation');
+    return;
+  }
   // let batches = await setBatches(orders, 100); // <- Set threshold here
   let batches = await setBatchesBandAid(orders, 300);
   let cleanedData = await cleanOrderObj(batches);
   await updateOrdersTable(cleanedData);
   let batchingGroup = await groupBy(batches, 'batchID');
-  // let batchInfo = await sendBatchInfo(batchingGroup);
-  // await updateBatchTable(batchingGroup, batchInfo);
+  let batchInfo = await sendBatchInfo(batchingGroup);
+  await updateBatchTable(batchingGroup, batchInfo);
 }
 
 async function buildBatchLogicAutomationRetouch() {
   let orders = await pullOrders('Automation Retouch');
+
+  if (orders.length == 0) {
+    console.log('No orders containing Automation Retouch');
+    return;
+  }
   // let batches = await setBatches(orders, 100); // <- Set threshold here
   let batches = await setBatchesBandAid(orders, 300);
   let cleanedData = await cleanOrderObj(batches);
@@ -491,6 +497,10 @@ async function buildBatchLogicAutomationRetouch() {
 
 async function buildBatchLogicAutomationNovelty() {
   let orders = await pullOrders('Automation Novelty');
+  if (orders.length == 0) {
+    console.log('No orders containing Automation Novelty');
+    return;
+  }
   // let batches = await setBatches(orders, 100); // <- Set threshold here
   let batches = await setBatchesBandAid(orders, 300);
   let cleanedData = await cleanOrderObj(batches);
@@ -502,6 +512,10 @@ async function buildBatchLogicAutomationNovelty() {
 
 async function buildBatchLogicAutomationNoveltyRetouch() {
   let orders = await pullOrders('Automation Novelty Retouch');
+  if (orders.length == 0) {
+    console.log('No orders containing Automation Novelty Retouch');
+    return;
+  }
   // let batches = await setBatches(orders, 100); // <- Set threshold here
   let batches = await setBatchesBandAid(orders, 300);
   let cleanedData = await cleanOrderObj(batches);
@@ -513,9 +527,9 @@ async function buildBatchLogicAutomationNoveltyRetouch() {
 
 async function doAllBatches() {
   await buildBatchLogicAutomation();
-  // await buildBatchLogicAutomationRetouch();
-  // await buildBatchLogicAutomationNovelty();
-  // await buildBatchLogicAutomationNoveltyRetouch();
+  await buildBatchLogicAutomationRetouch();
+  await buildBatchLogicAutomationNovelty();
+  await buildBatchLogicAutomationNoveltyRetouch();
 }
 
-// doAllBatches();
+doAllBatches();

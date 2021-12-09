@@ -20,7 +20,7 @@ axios.defaults.headers.common['Authorization'] =
 const generatePageArray = (n) =>
   [...new Array(n)].map((item, i) => i + 1);
 
-const orderList = generatePageArray(41);
+const orderList = generatePageArray(103);
 
 function fetchOrderList(pageNum) {
   const param_url = new URL(
@@ -86,7 +86,7 @@ function splitToChunks(items, chunkSize = 5) {
   return result;
 }
 
-function listOrderChunks(items, fn, chunkSize = 5) {
+function chunks(items, fn, chunkSize = 5) {
   let result = [];
   const chunks = splitToChunks(items, chunkSize);
   return series(chunks, (chunk) => {
@@ -117,7 +117,7 @@ function writeToFile(array) {
 
   // the finish event is emitted when all data has been flushed from the stream
   writeStream.on('finish', () => {
-    console.log(`wrote array data to file ${pathName}`);
+    console.log(`wrote all the array data to file ${pathName}`);
   });
 
   writeStream.on('error', (err) => {
@@ -130,6 +130,4 @@ function writeToFile(array) {
   writeStream.end();
 }
 
-const testing = listOrderChunks(orderList, fetchAndLog);
-
-// module.exports = { getAllOrderIds, gatherAllIDs, sendOrderList };
+const testing = chunks(orderList, fetchAndLog);

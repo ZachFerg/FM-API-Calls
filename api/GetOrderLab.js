@@ -92,6 +92,7 @@ async function getOrderLab(order_id) {
   } catch (err) {
     console.log('Order Call', order_id, 'unsuccessful...');
     badIDs.push(order_id);
+    // console.error(err);
   }
 }
 
