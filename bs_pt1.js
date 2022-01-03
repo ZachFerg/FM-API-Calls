@@ -10,6 +10,7 @@ function setBatchCategory(data) {
   const _fktPackage = data?.order?.orderPackageString ?? null;
   const imageOption = data?.order?.orderImageOptionsString ?? null;
   const homeZip = data?.order?.shippingAddress?.zipCode ?? null;
+  const fulfillmentState = data?.order?.orderItems[0]?.state ?? null;
 
   // const fmhvSeason = null;
   // const fmhvPaymentMethod = null;
@@ -49,6 +50,8 @@ function setBatchCategory(data) {
     fmhvStage.includes('Wholesale Reorder')
   ) {
     batch = 'To Loroco'; // 5
+  } else if (fulfillmentState == 'STATE_NONE') {
+    batch = 'Main Production'; // step 7
   } else if (fmhvStage !== null && fmhvStage.includes('AUTO')) {
     if (
       _fktPackage !== null &&

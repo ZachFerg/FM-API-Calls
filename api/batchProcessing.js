@@ -349,7 +349,7 @@ async function updateBatchTable(results, fmBatchInfo) {
   const batchLengthInfo = [];
   const resultKeys = Object.keys(results);
 
-  let fmObjcount = objectLength(fmBatchInfo);
+  let fmObjcount = objectLength(fmBatchInfo) ?? 0;
   const batchCat =
     results[resultKeys[0]][Object.keys(results[resultKeys[0]])[0]]
       .batchCategory;
@@ -401,8 +401,8 @@ async function updateBatchTable(results, fmBatchInfo) {
     .replace('T', ' ');
 
   for (let i = 0; i < fmObjcount; i++) {
-    let fmBatchId = fmBatchInfo[i].batchJobs[0].batchReference;
-    // let fmBatchId = 'B21-930-AGSN58';
+    let fmBatchId =
+      fmBatchInfo[i]?.batchJobs[0]?.batchReference ?? 'fill in';
     fmBatchRef.push(fmBatchId);
   }
 
@@ -463,6 +463,19 @@ async function updateBatchTable(results, fmBatchInfo) {
     console.error(err);
   }
 }
+
+// function makeid(length) {
+//   let result = '';
+//   let characters =
+//     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+//   let charactersLength = characters.length;
+//   for (let i = 0; i < length; i++) {
+//     result += characters.charAt(
+//       Math.floor(Math.random() * charactersLength),
+//     );
+//   }
+//   return result;
+// }
 
 async function buildBatchLogicAutomation() {
   let orders = await pullOrders('Automation');
@@ -526,10 +539,10 @@ async function buildBatchLogicAutomationNoveltyRetouch() {
 }
 
 async function doAllBatches() {
+  // await buildBatchLogicAutomationNoveltyRetouch();
+  // await buildBatchLogicAutomationNovelty();
+  // await buildBatchLogicAutomationRetouch();
   await buildBatchLogicAutomation();
-  await buildBatchLogicAutomationRetouch();
-  await buildBatchLogicAutomationNovelty();
-  await buildBatchLogicAutomationNoveltyRetouch();
 }
 
 doAllBatches();

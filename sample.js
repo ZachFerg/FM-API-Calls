@@ -11,6 +11,9 @@ const {
 axios.defaults.headers.common['Authorization'] =
   process.env.FM_API_KEY;
 
+axios.defaults.headers.common['User-Agent'] =
+  'Strawbridge-Automation';
+
 /**
  * finds the amount of objects in an object
  * @param {object} obj
@@ -152,6 +155,12 @@ function setBatchCategory(data) {
   const _fktPackage = data?.order?.orderPackageString ?? null;
   const imageOption = data?.order?.orderImageOptionsString ?? null;
   const homeZip = data?.order?.shippingAddress?.zipCode ?? null;
+  const isSubject = data.order.subject;
+  const fulfillmentState =
+    data?.order?.directFulfillmentState ?? null;
+  const imageName = data?.order?.images[0]?.originalFilename ?? null;
+  const fulfillmentStatus =
+    data?.order?.directFulfillmentStatus ?? null;
 
   batch = 'To Loroco';
 
@@ -164,13 +173,23 @@ function setBatchCategory(data) {
     batch = 'Main Production'; // 3
   } else if (homeZip === null) {
     batch = 'Main Production'; // 4
-  } else if (homeZip !== null && fmhvStage.includes('1')) {
+  } else if (homeZip !== null && fmhvStage.includes('1.')) {
     batch = 'Main Production'; // 6
   } else if (
     fmhvStage !== null &&
     fmhvStage.includes('Wholesale Reorder')
   ) {
     batch = 'To Loroco'; // 5
+  } else if (
+    fulfillmentState !== null &&
+    fulfillmentState == 'STATE_NONE'
+  ) {
+    batch = 'To Loroco'; // step 7
+  } else if (
+    imageName !== null &&
+    imageName == 'Placeholder Image.jpg'
+  ) {
+    batch = 'To Loroco'; // step 7
   } else if (fmhvStage !== null && fmhvStage.includes('AUTO')) {
     if (
       _fktPackage !== null &&
@@ -200,6 +219,8 @@ function setBatchCategory(data) {
       imageOption.includes('AB')
     ) {
       batch = 'Automation Novelty Retouch'; // 7d
+    } else if (isSubject === undefined) {
+      batch = 'To Loroco';
     }
   } else {
     batch = 'To Loroco'; // 11
@@ -343,7 +364,8 @@ function processOrders(data) {
     const TM =
       data[i]?.order?.clientSession?.client?.territoryCode ?? null;
     const dateCreated = data[i]?.order?.createdAt ?? null;
-    const dateModified = data[i]?.order?.modifiedAt ?? null;
+    // const dateModified = data[i]?.order?.modifiedAt ?? null;
+    const dateOrdered = data[i]?.order?.orderedAt ?? null;
     const namesOnPrints =
       data[i]?.order?.orderItems[3]?.orderItemOptions[0]?.value ??
       data[i]?.order?.orderItems[0]?.orderItemOptions[0]?.value ??
@@ -425,8 +447,8 @@ function processOrders(data) {
       studentLastName: studentLastName,
       teacher: teacher,
       TM: TM,
+      dateOrdered: formatDate(dateOrdered),
       dateCreated: formatDate(dateCreated),
-      dateModified: formatDate(dateModified),
       datePulled: formatDate(datePulled),
       age: age,
       sport: formatSport(sport),

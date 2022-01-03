@@ -25,11 +25,25 @@ function formatDate(date) {
   return [year, month, day].join('-');
 }
 
-const generatePageCount = async (n) =>
+const makePageArr = async (n) =>
   [...new Array(n)].map((item, i) => i + 1);
 
-function fetchPageCount() {
-  // const url = `https://api.fotomerchanthv.com/orders/${order_id}/lab`;
+// function fetchPageCount() {
+//   // const url = `https://api.fotomerchanthv.com/orders/${order_id}/lab`;
+//   const param_url = new URL(
+//     `https://api.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&page=1`,
+//   );
+
+//   const params = { from: fm_day_before, to: fm_yesterday };
+//   Object.keys(params).forEach((key) =>
+//     param_url.searchParams.append(key, params[key]),
+//   );
+//   return axios
+//     .get(param_url.href)
+//     .then((res) => console.log(res.data.paging.last));
+// }
+
+async function getPageCount() {
   const param_url = new URL(
     `https://api.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&page=1`,
   );
@@ -38,10 +52,21 @@ function fetchPageCount() {
   Object.keys(params).forEach((key) =>
     param_url.searchParams.append(key, params[key]),
   );
-  return axios
-    .get(param_url.href)
-    .then((res) => console.log(res.data.paging.last));
+
+  try {
+    const response = await axios.get(param_url.href);
+    let pageCount = response.data.paging.last;
+    return parseInt(pageCount);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-// let pageCount = fetchPageCount();
-// console.log(pageCount);
+async function generatePageArray() {
+  let pageCount = await getPageCount();
+  console.log(pageCount);
+  const orderList = await makePageArr(pageCount);
+  console.log(orderList);
+}
+
+generatePageArray();

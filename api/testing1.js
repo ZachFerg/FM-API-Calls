@@ -12,22 +12,20 @@ yesterday.setDate(yesterday.getDate() - 1);
 day_before.setDate(day_before.getDate() - 2);
 
 const fm_yesterday = formatDate(yesterday);
-const fm_day_before = formatDate(day_before);
+// const fm_yesterday = '2021-12-16';
 
 axios.defaults.headers.common['Authorization'] =
   process.env.FM_API_KEY;
 
-const generatePageArray = (n) =>
+const makePageArr = async (n) =>
   [...new Array(n)].map((item, i) => i + 1);
-
-const orderList = generatePageArray(103);
 
 function fetchOrderList(pageNum) {
   const param_url = new URL(
     `https://api.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&page=${pageNum}`,
   );
 
-  const params = { from: fm_day_before, to: fm_yesterday };
+  const params = { from: fm_yesterday, to: fm_yesterday };
   Object.keys(params).forEach((key) =>
     param_url.searchParams.append(key, params[key]),
   );
@@ -105,10 +103,9 @@ function extractIDs(data) {
 }
 
 function writeToFile(array) {
-  const today = formatDate(new Date());
-  const __dirname = path.resolve();
+  const __dirname = path.join();
   const writeStream = fs.createWriteStream(
-    __dirname + `/${today}-orderIDs.txt`,
+    __dirname + `/../ordertexts/${fm_yesterday}-orderIDs.txt`,
   );
   const pathName = writeStream.path;
 
@@ -130,4 +127,30 @@ function writeToFile(array) {
   writeStream.end();
 }
 
-const testing = chunks(orderList, fetchAndLog);
+async function getPageCount() {
+  const param_url = new URL(
+    `https://api.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&page=1`,
+  );
+
+  const params = { from: fm_yesterday, to: fm_yesterday };
+  Object.keys(params).forEach((key) =>
+    param_url.searchParams.append(key, params[key]),
+  );
+
+  try {
+    const response = await axios.get(param_url.href);
+    let pageCount = response.data.paging.last;
+    return parseInt(pageCount);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function generatePageArray() {
+  let pageCount = await getPageCount();
+  console.log(`${pageCount} pages for today`);
+  const orderArr = await makePageArr(pageCount);
+  const testing = chunks(orderArr, fetchAndLog);
+}
+
+generatePageArray();
