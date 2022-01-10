@@ -6,28 +6,25 @@ const { formatDate } = require('../helpers/formatFunctions');
 
 const today = new Date();
 const yesterday = new Date(today);
-const day_before = new Date(today);
-
 yesterday.setDate(yesterday.getDate() - 1);
-day_before.setDate(day_before.getDate() - 2);
-
-const fm_yesterday = formatDate(yesterday);
-const fm_day_before = formatDate(day_before);
+// const fm_yesterday = formatDate(yesterday);
+const fm_yesterday = '2022-01-08';
 
 axios.defaults.headers.common['Authorization'] =
   process.env.FM_API_KEY;
 
-const generatePageArray = (n) =>
-  [...new Array(n)].map((item, i) => i + 1);
+axios.defaults.headers.common['User-Agent'] =
+  'Strawbridge-Automation/1.0';
 
-const orderList = generatePageArray(41);
+const makePageArr = async (n) =>
+  [...new Array(n)].map((item, i) => i + 1);
 
 function fetchOrderList(pageNum) {
   const param_url = new URL(
     `https://api.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&page=${pageNum}`,
   );
 
-  const params = { from: fm_day_before, to: fm_yesterday };
+  const params = { from: fm_yesterday, to: fm_yesterday };
   Object.keys(params).forEach((key) =>
     param_url.searchParams.append(key, params[key]),
   );
@@ -78,7 +75,7 @@ function series(items, fn) {
     .then(() => result);
 }
 
-function splitToChunks(items, chunkSize = 5) {
+function splitToChunks(items, chunkSize = 10) {
   const result = [];
   for (let i = 0; i < items.length; i += chunkSize) {
     result.push(items.slice(i, i + chunkSize));
@@ -86,14 +83,14 @@ function splitToChunks(items, chunkSize = 5) {
   return result;
 }
 
-function listOrderChunks(items, fn, chunkSize = 5) {
+function chunks(items, fn, chunkSize = 10) {
   let result = [];
   const chunks = splitToChunks(items, chunkSize);
   return series(chunks, (chunk) => {
     return all(chunk, fn).then(
       (res) => (result = result.concat(res)),
     );
-  }).then(() => writeToFile(result));
+  }).then(() => result);
 }
 
 function extractIDs(data) {
@@ -105,10 +102,9 @@ function extractIDs(data) {
 }
 
 function writeToFile(array) {
-  const today = formatDate(new Date());
-  const __dirname = path.resolve();
+  const __dirname = path.join();
   const writeStream = fs.createWriteStream(
-    __dirname + `/${today}-orderIDs.txt`,
+    __dirname + `/../ordertexts/${fm_yesterday}-orderIDs.txt`,
   );
   const pathName = writeStream.path;
 
@@ -117,7 +113,7 @@ function writeToFile(array) {
 
   // the finish event is emitted when all data has been flushed from the stream
   writeStream.on('finish', () => {
-    console.log(`wrote array data to file ${pathName}`);
+    console.log(`wrote all the array data to file ${pathName}`);
   });
 
   writeStream.on('error', (err) => {
@@ -130,6 +126,35 @@ function writeToFile(array) {
   writeStream.end();
 }
 
-const testing = listOrderChunks(orderList, fetchAndLog);
+async function getPageCount() {
+  const param_url = new URL(
+    `https://api.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&page=1`,
+  );
 
-// module.exports = { getAllOrderIds, gatherAllIDs, sendOrderList };
+  const params = { from: fm_yesterday, to: fm_yesterday };
+  Object.keys(params).forEach((key) =>
+    param_url.searchParams.append(key, params[key]),
+  );
+
+  try {
+    const response = await axios.get(param_url.href);
+    let pageCount = response.data.paging.last;
+    return parseInt(pageCount);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function generatePageArray() {
+  let pageCount = await getPageCount();
+  console.log(`${pageCount} pages for today`);
+  const orderArr = await makePageArr(pageCount);
+  const ordersList = await chunks(orderArr, fetchAndLog);
+  console.log(ordersList)
+  writeToFile(ordersList)
+  return ordersList
+}
+
+// generatePageArray();
+
+module.exports = { generatePageArray };

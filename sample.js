@@ -173,13 +173,13 @@ function setBatchCategory(data) {
     batch = 'Main Production'; // 3
   } else if (homeZip === null) {
     batch = 'Main Production'; // 4
-  } else if (homeZip !== null && fmhvStage.includes('1.')) {
-    batch = 'Main Production'; // 6
   } else if (
     fmhvStage !== null &&
     fmhvStage.includes('Wholesale Reorder')
   ) {
     batch = 'To Loroco'; // 5
+  } else if (homeZip !== null && fmhvStage.includes('1.')) {
+    batch = 'Main Production'; // 6
   } else if (
     fulfillmentState !== null &&
     fulfillmentState == 'STATE_NONE'
@@ -187,11 +187,13 @@ function setBatchCategory(data) {
     batch = 'To Loroco'; // step 7
   } else if (
     imageName !== null &&
-    imageName == 'Placeholder Image.jpg'
+    imageName.includes('Placeholder')
   ) {
     batch = 'To Loroco'; // step 7
   } else if (fmhvStage !== null && fmhvStage.includes('AUTO')) {
-    if (
+    if (isSubject === undefined) {
+      batch = 'To Loroco';
+    } else if (
       _fktPackage !== null &&
       !_fktPackage.includes('DIST_') &&
       imageOption !== null &&
@@ -219,8 +221,6 @@ function setBatchCategory(data) {
       imageOption.includes('AB')
     ) {
       batch = 'Automation Novelty Retouch'; // 7d
-    } else if (isSubject === undefined) {
-      batch = 'To Loroco';
     }
   } else {
     batch = 'To Loroco'; // 11

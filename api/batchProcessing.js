@@ -1,6 +1,10 @@
 require('dotenv').config({ path: '../.ENV' });
 const axios = require('axios');
 
+
+axios.defaults.headers.common['User-Agent'] =
+  'Strawbridge-Automation/1.0';
+
 /**
  *
  * @param {string} date - date string
@@ -31,45 +35,6 @@ function objectLength(obj) {
   }
   return result;
 }
-
-// test data
-// const batchInfo = {
-//   batchJobs: [
-//     {
-//       type: 'order_distribution_df',
-//       batchReference: 'B21-930-AGSN58',
-//       state: 'STATE_QUEUED_FOR_PROCESSING',
-//       shippingAddress: {
-//         name: 'Strawbridge Studios',
-//         firstName: 'Strawbridge',
-//         lastName: 'Studios',
-//         phone: '18003269080',
-//         address1: '13616 Hillsborough Rd',
-//         city: 'Durham',
-//         zipCode: '27705',
-//         state: 'US-NC',
-//         stateLabel: 'NC',
-//         country: 'US',
-//         countryLabel: 'United States',
-//         id: 14303,
-//       },
-//       sortOrder: [
-//         {
-//           property: 'orders.id',
-//           direction: 'desc',
-//         },
-//       ],
-//       shippingMethod: {
-//         id: '01FCYX3QCC4WNY6727PWTSCGCS',
-//         type: 'bulk_special',
-//         supplierCode: 'ORDER_FEE',
-//         label: 'Post Picture Day Order Fee',
-//       },
-//       totalOrders: 1,
-//       id: '01FGW759HV6VA3WS8SQ9SD8WSY',
-//     },
-//   ],
-// };
 
 /**
  *
@@ -283,7 +248,7 @@ async function makeAPIBatchCall(arr) {
       address: {
         name: 'Strawbridge Studios',
         phone: '+1 800 326 9080',
-        address1: '13616 Hillsborough Rd',
+        address1: '3616 Hillsborough Rd',
         zipCode: '27705',
         city: 'Durham',
         country: 'US',
@@ -406,6 +371,7 @@ async function updateBatchTable(results, fmBatchInfo) {
     fmBatchRef.push(fmBatchId);
   }
 
+  // adds up the length of all orders in a batch
   for (let y = 0; y < resultKeys.length; y++) {
     totalBatchLength =
       results[resultKeys[y]][
@@ -441,8 +407,6 @@ async function updateBatchTable(results, fmBatchInfo) {
     batchInfo.push(batchPayload);
   }
 
-  // console.log(batchInfo);
-
   const param_url = new URL(
     `http://localhost:5000/api/batches/batches/`,
   );
@@ -464,19 +428,6 @@ async function updateBatchTable(results, fmBatchInfo) {
   }
 }
 
-// function makeid(length) {
-//   let result = '';
-//   let characters =
-//     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-//   let charactersLength = characters.length;
-//   for (let i = 0; i < length; i++) {
-//     result += characters.charAt(
-//       Math.floor(Math.random() * charactersLength),
-//     );
-//   }
-//   return result;
-// }
-
 async function buildBatchLogicAutomation() {
   let orders = await pullOrders('Automation');
   if (orders.length == 0) {
@@ -484,7 +435,7 @@ async function buildBatchLogicAutomation() {
     return;
   }
   // let batches = await setBatches(orders, 100); // <- Set threshold here
-  let batches = await setBatchesBandAid(orders, 300);
+  let batches = await setBatchesBandAid(orders, 100);
   let cleanedData = await cleanOrderObj(batches);
   await updateOrdersTable(cleanedData);
   let batchingGroup = await groupBy(batches, 'batchID');
@@ -500,7 +451,7 @@ async function buildBatchLogicAutomationRetouch() {
     return;
   }
   // let batches = await setBatches(orders, 100); // <- Set threshold here
-  let batches = await setBatchesBandAid(orders, 300);
+  let batches = await setBatchesBandAid(orders, 100);
   let cleanedData = await cleanOrderObj(batches);
   await updateOrdersTable(cleanedData);
   let batchingGroup = await groupBy(batches, 'batchID');
@@ -515,7 +466,7 @@ async function buildBatchLogicAutomationNovelty() {
     return;
   }
   // let batches = await setBatches(orders, 100); // <- Set threshold here
-  let batches = await setBatchesBandAid(orders, 300);
+  let batches = await setBatchesBandAid(orders, 100);
   let cleanedData = await cleanOrderObj(batches);
   await updateOrdersTable(cleanedData);
   let batchingGroup = await groupBy(batches, 'batchID');
@@ -530,7 +481,7 @@ async function buildBatchLogicAutomationNoveltyRetouch() {
     return;
   }
   // let batches = await setBatches(orders, 100); // <- Set threshold here
-  let batches = await setBatchesBandAid(orders, 300);
+  let batches = await setBatchesBandAid(orders, 100);
   let cleanedData = await cleanOrderObj(batches);
   await updateOrdersTable(cleanedData);
   let batchingGroup = await groupBy(batches, 'batchID');
