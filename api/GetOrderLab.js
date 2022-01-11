@@ -515,7 +515,7 @@ function orderChunks(items, fn, chunkSize = 100) {
 }
 
 function postToDB(payload) {
-  const url = `http://localhost:5000/api/orders/orders/`;
+  const url = `http://incdata.strawbridge.net/api/orders/orders/`;
   return axios
     .post(url, payload)
     .then((res) => console.log(res.data));

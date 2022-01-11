@@ -45,7 +45,7 @@ async function pullOrders(batchCategory) {
 
   try {
     let res = await axios.get(
-      `http://localhost:5000/api/orders/getOrders/${today}/${batchCategory}`,
+      `http://incdata.strawbridge.net/api/orders/getOrders/${today}/${batchCategory}`,
     );
     if (res.status == 200) {
       console.log(res.data.length + ' Orders pulled for today');
@@ -164,7 +164,7 @@ async function setBatchesBandAid(orders, orderThreshold) {
 async function getBatchID() {
   try {
     const response = await axios.get(
-      'http://localhost:5000/api/batches/batches/getBatchID',
+      'http://incdata.strawbridge.net/api/batches/batches/getBatchID',
     );
     let batchNum = response.data[0].batchNumber;
     return parseInt(batchNum);
@@ -197,7 +197,7 @@ async function cleanOrderObj(batchArr) {
 
 async function updateOrdersTable(Arr) {
   const param_url = new URL(
-    `http://localhost:5000/api/orders/orders/`,
+    `http://incdata.strawbridge.net/api/orders/orders/`,
   );
 
   const config = {
@@ -402,7 +402,7 @@ async function updateBatchTable(results, fmBatchInfo) {
   }
 
   const param_url = new URL(
-    `http://localhost:5000/api/batches/batches/`,
+    `http://incdata.strawbridge.net/api/batches/batches/`,
   );
 
   const config = {
