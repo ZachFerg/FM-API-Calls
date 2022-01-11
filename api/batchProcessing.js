@@ -1,7 +1,6 @@
 require('dotenv').config({ path: '../.ENV' });
 const axios = require('axios');
 
-
 axios.defaults.headers.common['User-Agent'] =
   'Strawbridge-Automation/1.0';
 
@@ -261,17 +260,12 @@ async function makeAPIBatchCall(arr) {
     `https://api.fotomerchanthv.com/batch_jobs`,
   );
 
-  // let param_url = new URL(
-  //   `https://api.staging.fotomerchanthv.com/batch_jobs`,
-  // );
-
   const config = {
     method: 'post',
     url: param_url.href,
     data: fmPayload,
     headers: {
       Authorization: process.env.FM_API_KEY,
-      // Authorization: process.env.FM_STAGE_API_KEY,
     },
   };
 
@@ -490,10 +484,10 @@ async function buildBatchLogicAutomationNoveltyRetouch() {
 }
 
 async function doAllBatches() {
-  // await buildBatchLogicAutomationNoveltyRetouch();
-  // await buildBatchLogicAutomationNovelty();
-  // await buildBatchLogicAutomationRetouch();
+  await buildBatchLogicAutomationNoveltyRetouch();
+  await buildBatchLogicAutomationNovelty();
+  await buildBatchLogicAutomationRetouch();
   await buildBatchLogicAutomation();
 }
 
-doAllBatches();
+module.exports = { doAllBatches };

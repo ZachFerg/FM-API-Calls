@@ -7,8 +7,8 @@ const { formatDate } = require('../helpers/formatFunctions');
 const today = new Date();
 const yesterday = new Date(today);
 yesterday.setDate(yesterday.getDate() - 1);
-// const fm_yesterday = formatDate(yesterday);
-const fm_yesterday = '2022-01-08';
+const fm_yesterday = formatDate(yesterday);
+// const fm_yesterday = '2022-01-08';
 
 axios.defaults.headers.common['Authorization'] =
   process.env.FM_API_KEY;
@@ -150,11 +150,8 @@ async function generatePageArray() {
   console.log(`${pageCount} pages for today`);
   const orderArr = await makePageArr(pageCount);
   const ordersList = await chunks(orderArr, fetchAndLog);
-  console.log(ordersList)
-  writeToFile(ordersList)
-  return ordersList
+  writeToFile(ordersList);
+  return ordersList;
 }
-
-// generatePageArray();
 
 module.exports = { generatePageArray };
