@@ -1,5 +1,5 @@
 const axios = require('axios');
-require('dotenv').config();
+require('dotenv').config({ path: '../.ENV' });
 const orderList = require('./orderList');
 const {
   formatRelationship,
@@ -264,6 +264,13 @@ function findPaperLength(data) {
   return paperLength;
 }
 
+function stripEmojis(text) {
+  return text.replace(
+    /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
+    '',
+  );
+}
+
 function processOrders(data) {
   let result = [];
 
@@ -281,6 +288,9 @@ function processOrders(data) {
       data[i]?.order?.orderFormEntrys[0]?.values[
         '01FDDDZDDT9QHNJZTF98J31X60'
       ] ?? // sports form FAIWPO2JMM-8B2-CW31LJ
+      data[i]?.order?.orderFormEntrys[0]?.values[
+        '01F24R2822D0Q0W9YSPTFBWB1G'
+      ] ?? // Journey form 01F24R281FV4Z18211EV4892AR
       null;
     const customerName = data[i]?.order?.recipientName ?? null;
     const emailAddress = data[i]?.order?.recipientEmail ?? null;
@@ -302,6 +312,12 @@ function processOrders(data) {
       data[i]?.order?.orderFormEntrys[0]?.values[
         'F98OL37WDL-9AM-LVRZG4'
       ] ?? // school info form
+      data[i]?.order?.orderFormEntrys[0]?.values[
+        '01EJEDZ7XS06J8ECPAT22P3P65'
+      ] ?? // YB form {UID}
+      data[i]?.order?.orderFormEntrys[0]?.values[
+        '01F251NVHPG4AECJYTS63GQ43B'
+      ] ?? // Journey form 01F24R281FV4Z18211EV4892AR
       null;
     const graduationYear =
       data[i]?.order?.orderItems[0]?.orderItemOptions[1]?.value ??
@@ -328,7 +344,14 @@ function processOrders(data) {
     const relationshipToStudent =
       data[i]?.order?.orderFormEntrys[0]?.values[
         'F99T5BZIXA-QGT-NB2EOO'
-      ] ?? null; // school info form F98OL37KKK-RFT-44F87S
+      ] ?? // school info form F98OL37KKK-RFT-44F87S
+      data[i]?.order?.orderFormEntrys[0]?.values[
+        '01EJEDZ7XY14T60C2RE7D59JPB'
+      ] ?? // YB form {UID}
+      data[i]?.order?.orderFormEntrys[0]?.values[
+        '01F24R2825H0M3R1TAS7HV664K'
+      ] ?? // Journey form 01F24R281FV4Z18211EV4892AR
+      null;
     const seasonExternalReference =
       data[i]?.order?.clientSession?.season?.externalReference ??
       null;
@@ -344,6 +367,12 @@ function processOrders(data) {
       data[i]?.order?.orderFormEntrys[0]?.values[
         'FAIWPO2NJ4-E9K-PL1I0Y'
       ] ?? // sports form FAIWPO2JMM-8B2-CW31LJ
+      data[i]?.order?.orderFormEntrys[0]?.values[
+        '01EJEDZ7XBFC2R410NWMGAQKKK'
+      ] ?? // YB form {UID}
+      data[i]?.order?.orderFormEntrys[0]?.values[
+        '01F24R2820GW6SE8800N6182T9'
+      ] ?? // Journey form 01F24R281FV4Z18211EV4892AR
       null;
     const studentID = data[i]?.order?.subject?.subjectId ?? null;
     const studentLastName =
@@ -354,12 +383,21 @@ function processOrders(data) {
       data[i]?.order?.orderFormEntrys[0]?.values[
         'FAIWV436HI-I07-DO5SSQ'
       ] ?? // sports form FAIWPO2JMM-8B2-CW31LJ
+      data[i]?.order?.orderFormEntrys[0]?.values[
+        '01EJEDZ7XD4PWC5YFDAWJA80BR'
+      ] ?? // YB form {UID}
+      data[i]?.order?.orderFormEntrys[0]?.values[
+        '01F24R2821D7EH08EHBJ50E0G2'
+      ] ?? // Journey form 01F24R281FV4Z18211EV4892AR
       null;
     const teacher =
       data[i]?.order?.subject?.teacher ??
       data[i]?.order?.orderFormEntrys[0]?.values[
         'F98OL37QJ1-Y5M-DPEU7K'
       ] ?? // school info form F98OL37KKK-RFT-44F87S
+      data[i]?.order?.orderFormEntrys[0]?.values[
+        '01EJEDZ7XD4PWC5YFDAWJA80BS'
+      ] ?? // YB form {UID}
       null;
     const TM =
       data[i]?.order?.clientSession?.client?.territoryCode ?? null;
@@ -452,7 +490,7 @@ function processOrders(data) {
       datePulled: formatDate(datePulled),
       age: age,
       sport: formatSport(sport),
-      teamName: teamName,
+      teamName: teamName ? stripEmojis(teamName) : teamName,
       coach: coach,
       jerseyNumber: jerseyNumber,
       batchID: batchID,
@@ -521,10 +559,12 @@ function postToDB(payload) {
     .then((res) => console.log(res.data));
 }
 
-
 async function getOrderLabData(orderList) {
-  console.log("starting get order lab calls")
-  await orderChunks(orderList, fetchOrder)
+  console.log('starting get order lab calls');
+  await orderChunks(orderList, fetchOrder);
 }
+
+// comment unless running manually
+getOrderLabData(orderList);
 
 module.exports = { getOrderLabData };

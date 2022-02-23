@@ -8,7 +8,7 @@ const today = new Date();
 const yesterday = new Date(today);
 yesterday.setDate(yesterday.getDate() - 1);
 const fm_yesterday = formatDate(yesterday);
-// const fm_yesterday = '2022-01-08';
+// const fm_yesterday = '2022-01-22';
 
 axios.defaults.headers.common['Authorization'] =
   process.env.FM_API_KEY;
@@ -153,5 +153,8 @@ async function generatePageArray() {
   writeToFile(ordersList);
   return ordersList;
 }
+
+// comment unless running manually
+// generatePageArray();
 
 module.exports = { generatePageArray };

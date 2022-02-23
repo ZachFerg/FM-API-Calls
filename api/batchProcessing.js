@@ -341,8 +341,8 @@ async function updateBatchTable(results, fmBatchInfo) {
 
   // fields for DB creation
   const recQC = 1;
-  const xmlQC = 1;
-  const preRipQC = 1;
+  const xmlQC = 0;
+  const preRipQC = 0;
   const postRipQC = 1;
   let retouchConfig = await setRetouching(batchCat);
   retouch = retouchConfig[0];
@@ -489,5 +489,8 @@ async function doAllBatches() {
   await buildBatchLogicAutomationRetouch();
   await buildBatchLogicAutomation();
 }
+
+// comment unless running manually
+doAllBatches();
 
 module.exports = { doAllBatches };
