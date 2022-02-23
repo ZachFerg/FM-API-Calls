@@ -491,6 +491,6 @@ async function doAllBatches() {
 }
 
 // comment unless running manually
-doAllBatches();
+// doAllBatches();
 
 module.exports = { doAllBatches };
