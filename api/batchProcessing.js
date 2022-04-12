@@ -41,7 +41,6 @@ function objectLength(obj) {
  */
 async function pullOrders(batchCategory) {
   const today = formatDate(Date.now());
-  // console.log(today);
 
   try {
     let res = await axios.get(

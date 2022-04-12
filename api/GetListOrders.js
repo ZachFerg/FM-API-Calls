@@ -8,7 +8,10 @@ const today = new Date();
 const yesterday = new Date(today);
 yesterday.setDate(yesterday.getDate() - 1);
 const fm_yesterday = formatDate(yesterday);
-// const fm_yesterday = '2022-01-22';
+
+// for manually setting dates
+// const fm_today = '2021-09-30';
+// const fm_yesterday = '2021-09-01';
 
 axios.defaults.headers.common['Authorization'] =
   process.env.FM_API_KEY;
@@ -23,6 +26,9 @@ function fetchOrderList(pageNum) {
   const param_url = new URL(
     `https://api.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&page=${pageNum}`,
   );
+
+  // for manually switching up API call
+  // const params = { from: fm_yesterday, to: fm_today };
 
   const params = { from: fm_yesterday, to: fm_yesterday };
   Object.keys(params).forEach((key) =>
@@ -130,6 +136,9 @@ async function getPageCount() {
   const param_url = new URL(
     `https://api.fotomerchanthv.com/orders?limit=100&type=all&orderDir=ASC&page=1`,
   );
+
+  // for manually switching up API call
+  // const params = { from: fm_yesterday, to: fm_today };
 
   const params = { from: fm_yesterday, to: fm_yesterday };
   Object.keys(params).forEach((key) =>
