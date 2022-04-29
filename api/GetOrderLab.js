@@ -570,6 +570,6 @@ async function getOrderLabData(orderList) {
 }
 
 // comment unless running manually
-// getOrderLabData(orderList);
+getOrderLabData(orderList);
 
 module.exports = { getOrderLabData };
