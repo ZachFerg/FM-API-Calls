@@ -228,6 +228,69 @@ function setBatchCategory(data) {
   return batch;
 }
 
+function setBatchCategoryNew(data) {
+  const fmhvSeason =
+    data?.order?.clientSession?.season?.label ?? null;
+  const fmhvPaymentMethod = data?.order?.paymentMethod ?? null;
+  const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
+  console.log(fmhvStage);
+  const _fktPackage = data?.order?.orderPackageString ?? null;
+  const imageOption = data?.order?.orderImageOptionsString ?? null;
+  const homeZip = data?.order?.shippingAddress?.zipCode ?? null;
+  const isSubject = data.order.subject;
+  const fulfillmentState =
+    data?.order?.directFulfillmentState ?? null;
+  const imageName = data?.order?.images[0]?.originalFilename ?? null;
+  console.log(imageName);
+
+  batch = 'To Loroco';
+
+  if (
+    (fmhvSeason !== null && fmhvSeason.includes('Senior')) ||
+    (fmhvSeason !== null && fmhvSeason.includes('Year'))
+  ) {
+    batch = 'Main Production'; // steps 1 & 2
+  } else if (fmhvPaymentMethod === null) {
+    batch = 'Main Production'; // step 3
+  } else if (homeZip === null) {
+    batch = 'Main Production'; // step 4
+  } else if (
+    fmhvStage !== null &&
+    fmhvStage.includes('Wholesale Reorder')
+  ) {
+    batch = 'To Loroco'; // step 5
+  } else if (homeZip !== null && fmhvStage.includes('1.')) {
+    batch = 'Main Production'; // step 6
+  } else if (
+    fulfillmentState !== null &&
+    fulfillmentState == 'STATE_NONE'
+  ) {
+    batch = 'To Loroco'; // step 7
+  } else if (
+    imageName !== null &&
+    imageName.includes('Placeholder')
+  ) {
+    batch = 'To Loroco'; // step 8
+  } else if (fmhvStage !== null && fmhvStage.includes('AUTO JPG')) {
+    if (imageOption !== null && !imageOption.includes('AB')) {
+      batch = 'Automation JPG'; // step 10
+    } else if (imageOption !== null && imageOption.includes('AB')) {
+      batch = 'Automation Retouch JPG'; // step 11
+    }
+  } else if (fmhvStage !== null && fmhvStage.includes('AUTO')) {
+    if (isSubject === undefined) {
+      batch = 'To Loroco'; // step 9
+    } else if (imageOption !== null && !imageOption.includes('AB')) {
+      batch = 'Automation PNG'; // step 12
+    } else if (imageOption !== null && imageOption.includes('AB')) {
+      batch = 'Automation Retouch PNG'; // step 13
+    }
+  } else {
+    batch = 'To Loroco'; // step 14
+  }
+  return batch;
+}
+
 /**
  *
  * @returns {number} paperLength - width of all items in an order
@@ -435,6 +498,7 @@ function processOrders(data) {
       ] ?? null; // sports form FAIWPO2JMM-8B2-CW31LJ
     const paperLength = findPaperLength(data[i]);
     const batchCategory = setBatchCategory(data[i]);
+    // const batchCategory = setBatchCategoryNew(data[i]);
     const imageOption =
       data[i]?.order?.orderImageOptionsString ?? null;
 
@@ -570,6 +634,6 @@ async function getOrderLabData(orderList) {
 }
 
 // comment unless running manually
-getOrderLabData(orderList);
+// getOrderLabData(orderList);
 
 module.exports = { getOrderLabData };
