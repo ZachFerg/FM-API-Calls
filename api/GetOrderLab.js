@@ -147,88 +147,88 @@ function objectLength(obj) {
  * Sets batchCategory based off values from the response
  * @returns {string} batch - batchCategory value
  */
+// function setBatchCategoryOld(data) {
+//   const fmhvSeason =
+//     data?.order?.clientSession?.season?.label ?? null;
+//   const fmhvPaymentMethod = data?.order?.paymentMethod ?? null;
+//   const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
+//   const _fktPackage = data?.order?.orderPackageString ?? null;
+//   const imageOption = data?.order?.orderImageOptionsString ?? null;
+//   const homeZip = data?.order?.shippingAddress?.zipCode ?? null;
+//   const isSubject = data.order.subject;
+//   const fulfillmentState =
+//     data?.order?.directFulfillmentState ?? null;
+//   const imageName = data?.order?.images[0]?.originalFilename ?? null;
+//   const fulfillmentStatus =
+//     data?.order?.directFulfillmentStatus ?? null;
+
+//   batch = 'To Loroco';
+
+//   if (
+//     (fmhvSeason !== null && fmhvSeason.includes('Senior')) ||
+//     (fmhvSeason !== null && fmhvSeason.includes('Year'))
+//   ) {
+//     batch = 'Main Production'; // 1 & 2
+//   } else if (fmhvPaymentMethod === null) {
+//     batch = 'Main Production'; // 3
+//   } else if (homeZip === null) {
+//     batch = 'Main Production'; // 4
+//   } else if (
+//     fmhvStage !== null &&
+//     fmhvStage.includes('Wholesale Reorder')
+//   ) {
+//     batch = 'To Loroco'; // 5
+//   } else if (homeZip !== null && fmhvStage.includes('1.')) {
+//     batch = 'Main Production'; // 6
+//   } else if (
+//     fulfillmentState !== null &&
+//     fulfillmentState == 'STATE_NONE'
+//   ) {
+//     batch = 'To Loroco'; // step 7
+//   } else if (
+//     imageName !== null &&
+//     imageName.includes('Placeholder')
+//   ) {
+//     batch = 'To Loroco'; // step 7
+//   } else if (fmhvStage !== null && fmhvStage.includes('AUTO')) {
+//     if (isSubject === undefined) {
+//       batch = 'To Loroco';
+//     } else if (
+//       _fktPackage !== null &&
+//       !_fktPackage.includes('DIST_') &&
+//       imageOption !== null &&
+//       !imageOption.includes('AB')
+//     ) {
+//       batch = 'Automation'; // 7a
+//     } else if (
+//       _fktPackage !== null &&
+//       _fktPackage.includes('DIST_') &&
+//       imageOption !== null &&
+//       !imageOption.includes('AB')
+//     ) {
+//       batch = 'Automation Novelty'; // 7b
+//     } else if (
+//       _fktPackage !== null &&
+//       !_fktPackage.includes('DIST_') &&
+//       imageOption !== null &&
+//       imageOption.includes('AB')
+//     ) {
+//       batch = 'Automation Retouch'; // 7c
+//     } else if (
+//       _fktPackage !== null &&
+//       _fktPackage.includes('DIST_') &&
+//       imageOption !== null &&
+//       imageOption.includes('AB')
+//     ) {
+//       batch = 'Automation Novelty Retouch'; // 7d
+//     }
+//   } else {
+//     batch = 'To Loroco'; // 11
+//   }
+//   return batch;
+// }
+
 function setBatchCategory(data) {
-  const fmhvSeason =
-    data?.order?.clientSession?.season?.label ?? null;
-  const fmhvPaymentMethod = data?.order?.paymentMethod ?? null;
-  const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
-  const _fktPackage = data?.order?.orderPackageString ?? null;
-  const imageOption = data?.order?.orderImageOptionsString ?? null;
-  const homeZip = data?.order?.shippingAddress?.zipCode ?? null;
-  const isSubject = data.order.subject;
-  const fulfillmentState =
-    data?.order?.directFulfillmentState ?? null;
-  const imageName = data?.order?.images[0]?.originalFilename ?? null;
-  const fulfillmentStatus =
-    data?.order?.directFulfillmentStatus ?? null;
-
-  batch = 'To Loroco';
-
-  if (
-    (fmhvSeason !== null && fmhvSeason.includes('Senior')) ||
-    (fmhvSeason !== null && fmhvSeason.includes('Year'))
-  ) {
-    batch = 'Main Production'; // 1 & 2
-  } else if (fmhvPaymentMethod === null) {
-    batch = 'Main Production'; // 3
-  } else if (homeZip === null) {
-    batch = 'Main Production'; // 4
-  } else if (
-    fmhvStage !== null &&
-    fmhvStage.includes('Wholesale Reorder')
-  ) {
-    batch = 'To Loroco'; // 5
-  } else if (homeZip !== null && fmhvStage.includes('1.')) {
-    batch = 'Main Production'; // 6
-  } else if (
-    fulfillmentState !== null &&
-    fulfillmentState == 'STATE_NONE'
-  ) {
-    batch = 'To Loroco'; // step 7
-  } else if (
-    imageName !== null &&
-    imageName.includes('Placeholder')
-  ) {
-    batch = 'To Loroco'; // step 7
-  } else if (fmhvStage !== null && fmhvStage.includes('AUTO')) {
-    if (isSubject === undefined) {
-      batch = 'To Loroco';
-    } else if (
-      _fktPackage !== null &&
-      !_fktPackage.includes('DIST_') &&
-      imageOption !== null &&
-      !imageOption.includes('AB')
-    ) {
-      batch = 'Automation'; // 7a
-    } else if (
-      _fktPackage !== null &&
-      _fktPackage.includes('DIST_') &&
-      imageOption !== null &&
-      !imageOption.includes('AB')
-    ) {
-      batch = 'Automation Novelty'; // 7b
-    } else if (
-      _fktPackage !== null &&
-      !_fktPackage.includes('DIST_') &&
-      imageOption !== null &&
-      imageOption.includes('AB')
-    ) {
-      batch = 'Automation Retouch'; // 7c
-    } else if (
-      _fktPackage !== null &&
-      _fktPackage.includes('DIST_') &&
-      imageOption !== null &&
-      imageOption.includes('AB')
-    ) {
-      batch = 'Automation Novelty Retouch'; // 7d
-    }
-  } else {
-    batch = 'To Loroco'; // 11
-  }
-  return batch;
-}
-
-function setBatchCategoryNew(data) {
   const fmhvSeason =
     data?.order?.clientSession?.season?.label ?? null;
   const fmhvPaymentMethod = data?.order?.paymentMethod ?? null;

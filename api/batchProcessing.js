@@ -421,10 +421,71 @@ async function updateBatchTable(results, fmBatchInfo) {
   }
 }
 
-async function buildBatchLogicAutomation() {
-  let orders = await pullOrders('Automation');
+// async function buildBatchLogicAutomation() {
+//   let orders = await pullOrders('Automation');
+//   if (orders.length == 0) {
+//     console.log('No orders containing Automation');
+//     return;
+//   }
+//   // let batches = await setBatches(orders, 100); // <- Set threshold here
+//   let batches = await setBatchesBandAid(orders, 100);
+//   let cleanedData = await cleanOrderObj(batches);
+//   await updateOrdersTable(cleanedData);
+//   let batchingGroup = await groupBy(batches, 'batchID');
+//   let batchInfo = await sendBatchInfo(batchingGroup);
+//   await updateBatchTable(batchingGroup, batchInfo);
+// }
+
+// async function buildBatchLogicAutomationRetouch() {
+//   let orders = await pullOrders('Automation Retouch');
+
+//   if (orders.length == 0) {
+//     console.log('No orders containing Automation Retouch');
+//     return;
+//   }
+//   // let batches = await setBatches(orders, 100); // <- Set threshold here
+//   let batches = await setBatchesBandAid(orders, 100);
+//   let cleanedData = await cleanOrderObj(batches);
+//   await updateOrdersTable(cleanedData);
+//   let batchingGroup = await groupBy(batches, 'batchID');
+//   let batchInfo = await sendBatchInfo(batchingGroup);
+//   await updateBatchTable(batchingGroup, batchInfo);
+// }
+
+// async function buildBatchLogicAutomationNovelty() {
+//   let orders = await pullOrders('Automation Novelty');
+//   if (orders.length == 0) {
+//     console.log('No orders containing Automation Novelty');
+//     return;
+//   }
+//   // let batches = await setBatches(orders, 100); // <- Set threshold here
+//   let batches = await setBatchesBandAid(orders, 100);
+//   let cleanedData = await cleanOrderObj(batches);
+//   await updateOrdersTable(cleanedData);
+//   let batchingGroup = await groupBy(batches, 'batchID');
+//   let batchInfo = await sendBatchInfo(batchingGroup);
+//   await updateBatchTable(batchingGroup, batchInfo);
+// }
+
+// async function buildBatchLogicAutomationNoveltyRetouch() {
+//   let orders = await pullOrders('Automation Novelty Retouch');
+//   if (orders.length == 0) {
+//     console.log('No orders containing Automation Novelty Retouch');
+//     return;
+//   }
+//   // let batches = await setBatches(orders, 100); // <- Set threshold here
+//   let batches = await setBatchesBandAid(orders, 100);
+//   let cleanedData = await cleanOrderObj(batches);
+//   await updateOrdersTable(cleanedData);
+//   let batchingGroup = await groupBy(batches, 'batchID');
+//   let batchInfo = await sendBatchInfo(batchingGroup);
+//   await updateBatchTable(batchingGroup, batchInfo);
+// }
+
+async function buildBatchLogicAutomationJPG() {
+  let orders = await pullOrders('Automation JPG');
   if (orders.length == 0) {
-    console.log('No orders containing Automation');
+    console.log('No orders containing Automation JPG');
     return;
   }
   // let batches = await setBatches(orders, 100); // <- Set threshold here
@@ -436,11 +497,10 @@ async function buildBatchLogicAutomation() {
   await updateBatchTable(batchingGroup, batchInfo);
 }
 
-async function buildBatchLogicAutomationRetouch() {
-  let orders = await pullOrders('Automation Retouch');
-
+async function buildBatchLogicAutomationRetouchJPG() {
+  let orders = await pullOrders('Automation Retouch JPG');
   if (orders.length == 0) {
-    console.log('No orders containing Automation Retouch');
+    console.log('No orders containing Automation Retouch JPG');
     return;
   }
   // let batches = await setBatches(orders, 100); // <- Set threshold here
@@ -452,10 +512,10 @@ async function buildBatchLogicAutomationRetouch() {
   await updateBatchTable(batchingGroup, batchInfo);
 }
 
-async function buildBatchLogicAutomationNovelty() {
-  let orders = await pullOrders('Automation Novelty');
+async function buildBatchLogicAutomationPNG() {
+  let orders = await pullOrders('Automation PNG');
   if (orders.length == 0) {
-    console.log('No orders containing Automation Novelty');
+    console.log('No orders containing Automation PNG');
     return;
   }
   // let batches = await setBatches(orders, 100); // <- Set threshold here
@@ -467,10 +527,10 @@ async function buildBatchLogicAutomationNovelty() {
   await updateBatchTable(batchingGroup, batchInfo);
 }
 
-async function buildBatchLogicAutomationNoveltyRetouch() {
-  let orders = await pullOrders('Automation Novelty Retouch');
+async function buildBatchLogicAutomationRetouchPNG() {
+  let orders = await pullOrders('Automation Retouch PNG');
   if (orders.length == 0) {
-    console.log('No orders containing Automation Novelty Retouch');
+    console.log('No orders containing Automation Retouch PNG');
     return;
   }
   // let batches = await setBatches(orders, 100); // <- Set threshold here
@@ -481,12 +541,19 @@ async function buildBatchLogicAutomationNoveltyRetouch() {
   let batchInfo = await sendBatchInfo(batchingGroup);
   await updateBatchTable(batchingGroup, batchInfo);
 }
+
+// async function doAllBatchesOld() {
+//   await buildBatchLogicAutomationNoveltyRetouch();
+//   await buildBatchLogicAutomationNovelty();
+//   await buildBatchLogicAutomationRetouch();
+//   await buildBatchLogicAutomation();
+// }
 
 async function doAllBatches() {
-  await buildBatchLogicAutomationNoveltyRetouch();
-  await buildBatchLogicAutomationNovelty();
-  await buildBatchLogicAutomationRetouch();
-  await buildBatchLogicAutomation();
+  await buildBatchLogicAutomationJPG();
+  await buildBatchLogicAutomationRetouchJPG();
+  await buildBatchLogicAutomationPNG();
+  await buildBatchLogicAutomationRetouchPNG();
 }
 
 // comment unless running manually
