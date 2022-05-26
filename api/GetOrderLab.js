@@ -233,7 +233,6 @@ function setBatchCategory(data) {
     data?.order?.clientSession?.season?.label ?? null;
   const fmhvPaymentMethod = data?.order?.paymentMethod ?? null;
   const fmhvStage = data?.order?.clientSessionStage?.label ?? null;
-  console.log(fmhvStage);
   const _fktPackage = data?.order?.orderPackageString ?? null;
   const imageOption = data?.order?.orderImageOptionsString ?? null;
   const homeZip = data?.order?.shippingAddress?.zipCode ?? null;
@@ -241,7 +240,6 @@ function setBatchCategory(data) {
   const fulfillmentState =
     data?.order?.directFulfillmentState ?? null;
   const imageName = data?.order?.images[0]?.originalFilename ?? null;
-  console.log(imageName);
 
   batch = 'To Loroco';
 

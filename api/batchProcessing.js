@@ -314,8 +314,8 @@ async function updateBatchTable(results, fmBatchInfo) {
 
   async function setRetouching(batchCat) {
     if (
-      batchCat === 'Automation Retouch' ||
-      batchCat === 'Automation Novelty Retouch'
+      batchCat === 'Automation Retouch PNG' ||
+      batchCat === 'Automation Retouch JPG'
     ) {
       retouch = 1;
       retouchQC = 1;
