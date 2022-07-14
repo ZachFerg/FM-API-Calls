@@ -10,8 +10,8 @@ yesterday.setDate(yesterday.getDate() - 1);
 const fm_yesterday = formatDate(yesterday);
 
 // for manually setting dates
-// const fm_today = '2021-10-31';
-// const fm_yesterday = '2021-10-01';
+// const fm_today = '2022-06-19';
+// const fm_yesterday = '2022-06-18';
 
 axios.defaults.headers.common['Authorization'] =
   process.env.FM_API_KEY;

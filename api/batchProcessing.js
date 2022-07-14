@@ -384,7 +384,7 @@ async function updateBatchTable(results, fmBatchInfo) {
       fmBatchId: zipped[b][1],
       paperSurface: paperSurface,
       paperWidth: paperWidth,
-      batchLength: zipped[b][2],
+      // batchLength: zipped[b][2],
       envelopeType: envelopeType,
       shipMethod: shipMethod,
       recQC: recQC,

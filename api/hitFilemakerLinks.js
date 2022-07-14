@@ -31,4 +31,6 @@ async function hitFilemakerLinks() {
   }, 15000);
 }
 
+// hitFilemakerLinks();
+
 module.exports = { hitFilemakerLinks };
