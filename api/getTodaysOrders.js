@@ -8,7 +8,7 @@ async function getTodaysOrders() {
   let data = await getListOrders.generatePageArray();
   let result = await getOrderLab.getOrderLabData(data.flat(Infinity));
   await batchProcessing.doAllBatches();
-  // await fmpLinks.hitFilemakerLinks();
+  await fmpLinks.hitFilemakerLinks();
 }
 
 getTodaysOrders();
